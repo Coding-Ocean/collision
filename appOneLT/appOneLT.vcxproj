@@ -149,13 +149,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="axis.cpp" />
     <ClCompile Include="gmain.cpp" />
+    <ClCompile Include="segment.cpp" />
+    <ClCompile Include="tempSquare.cpp" />
+    <ClCompile Include="triangle.cpp" />
+    <ClCompile Include="view_proj.cpp" />
+    <ClCompile Include="wall.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="axis.h" />
+    <ClInclude Include="segment.h" />
+    <ClInclude Include="tempSquare.h" />
+    <ClInclude Include="triangle.h" />
+    <ClInclude Include="view_proj.h" />
+    <ClInclude Include="wall.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
