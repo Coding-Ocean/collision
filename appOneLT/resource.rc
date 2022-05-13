@@ -1,0 +1,7 @@
+MYICON		ICON    "../libOneLT/res/joypad.ico"
+IMAGE_PS	SHADER	"../libOneLT/res/ImagePixelShader.cso"
+IMAGE_VS	SHADER	"../libOneLT/res/ImageVertexShader.cso"
+SHAPE_PS	SHADER	"../libOneLT/res/ShapePixelShader.cso"
+SHAPE_VS	SHADER	"../libOneLT/res/ShapeVertexShader.cso"
+TRIANGLE_PS	SHADER	"../libOneLT/res/TrianglePixelShader.cso"
+TRIANGLE_VS	SHADER	"../libOneLT/res/TriangleVertexShader.cso"
