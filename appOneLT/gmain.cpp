@@ -3,7 +3,7 @@
 #include"segment.h"
 #include"triangle.h"
 #include"axis.h"
-#include"tempSquare.h"
+#include"squareWithHole.h"
 
 void input(VECTOR& tran,VECTOR& rot,float speed)
 {
@@ -175,7 +175,7 @@ void gmain() {
             segment(sp, ep, white, 1.5f);
             
             if (dispSquareFlag) { 
-                square(triTran, triRot, COLOR(128, 128, 128, 160)); 
+                squareWithHole(triTran, triRot, COLOR(128, 128, 128, 160)); 
             }
             
             triangle(p, triColor);
