@@ -1,2 +1,2 @@
 #pragma once
-void square(VECTOR& t, VECTOR& r, const COLOR& c);
+void square(const VECTOR* sqp, const COLOR& c);

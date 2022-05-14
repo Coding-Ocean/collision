@@ -46,6 +46,16 @@ void gmain() {
     VECTOR n;//normal
     VECTOR nTran;//ベクトルnの移動用
     VECTOR nRot;//ベクトルnの回転用
+    //説明用平面オリジナルポジションop
+    float l = 0.8f;
+    VECTOR op[4] = {
+        VECTOR(-l, 0, -l),
+        VECTOR(-l, 0, l),
+        VECTOR(l, 0, -l),
+        VECTOR(l, 0, l),
+    };
+    //座標変換後の平面ポジションsqp
+    VECTOR p[4];
  
     //-----------------------------------------------------------------------
     //線分と三角形を座標変換するための共用データ
@@ -94,6 +104,10 @@ void gmain() {
         //world.mulTranslate(nTran);
         world.mulRotateYXZ(nRot);
         n = world * on;
+        //説明用平面を動かす
+        for (int i = 0; i < 4; i++) {
+            p[i] = world * op[i];
+        }
         //内積ｄ----------------------------------------------------------------
         float d = dot(n, a);
         //描画----------------------------------------------------------------
@@ -105,7 +119,7 @@ void gmain() {
         segment(o, a, cyan, 1.5f);
         segment(o, n * d, red, 3.0f);
         segment(a, n * d, white, 0.2f);
-        square(nTran, nRot, gray);
+        square(p, gray);
 
         //text info
         float size = 30;

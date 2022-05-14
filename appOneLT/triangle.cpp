@@ -4,9 +4,9 @@
 void triangle(const VECTOR* op, const COLOR& c) 
 {
     VECTOR p[3];
-    //‚»‚µ‚ÄÀ•W•ÏŠ·
+    //À•W•ÏŠ·
     for (int i = 0; i < 3; i++) {
-        p[i] = gView * (op[i]);
+        p[i] = gView * op[i];
         p[i] = gProj * p[i];
     }
     //•`‰æ
