@@ -10,7 +10,7 @@
     <ClCompile Include="gmain.cpp" />
     <ClCompile Include="axis.cpp" />
     <ClCompile Include="segment.cpp" />
-    <ClCompile Include="tempSquare.cpp" />
+    <ClCompile Include="squareWithHole.cpp" />
     <ClCompile Include="triangle.cpp" />
     <ClCompile Include="view_proj.cpp" />
     <ClCompile Include="wall.cpp" />
@@ -29,7 +29,7 @@
   <ItemGroup>
     <ClInclude Include="axis.h" />
     <ClInclude Include="segment.h" />
-    <ClInclude Include="tempSquare.h" />
+    <ClInclude Include="squareWithHole.h" />
     <ClInclude Include="triangle.h" />
     <ClInclude Include="view_proj.h" />
     <ClInclude Include="wall.h" />

@@ -17,7 +17,7 @@ VECTOR osqp[11] = {
     VECTOR(0, 0, -l),
 };
 
-void square(VECTOR& t, VECTOR& r, const COLOR& c)
+void squareWithHole(VECTOR& t, VECTOR& r, const COLOR& c)
 {
     MATRIX world;
     world.identity();

@@ -1,2 +1,2 @@
 #pragma once
-void plane(VECTOR& t, VECTOR& r, const COLOR& c);
+void square(VECTOR& t, VECTOR& r, const COLOR& c);

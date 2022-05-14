@@ -2,7 +2,7 @@
 #include"graphic.h"
 #include"VECTOR.h"
 
-static float l = 1;
+static float l = 0.8f;
 VECTOR oplp[11] = {
     VECTOR(0,0,-0.5f),
     VECTOR(-0.433f,0,0.25f),
@@ -17,11 +17,11 @@ VECTOR oplp[11] = {
     VECTOR(0, 0, -l),
 };
 
-void plane(VECTOR& t, VECTOR& r, const COLOR& c)
+void square(VECTOR& t, VECTOR& r, const COLOR& c)
 {
     MATRIX world;
     world.identity();
-    world.mulTranslate(t);
+    //world.mulTranslate(t);
     world.mulRotateYXZ(r);
     //ÇªÇµÇƒç¿ïWïœä∑
     VECTOR p[11];
