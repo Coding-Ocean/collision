@@ -152,6 +152,7 @@
     <ClCompile Include="axis.cpp" />
     <ClCompile Include="gmain.cpp" />
     <ClCompile Include="segment.cpp" />
+    <ClCompile Include="square.cpp" />
     <ClCompile Include="tempSquare.cpp" />
     <ClCompile Include="triangle.cpp" />
     <ClCompile Include="view_proj.cpp" />
@@ -166,6 +167,7 @@
   <ItemGroup>
     <ClInclude Include="axis.h" />
     <ClInclude Include="segment.h" />
+    <ClInclude Include="square.h" />
     <ClInclude Include="tempSquare.h" />
     <ClInclude Include="triangle.h" />
     <ClInclude Include="view_proj.h" />
