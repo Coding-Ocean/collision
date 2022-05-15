@@ -8,14 +8,14 @@ extern MATRIX gView={0}, gProj={0};
 //ƒJƒƒ‰‚ÌˆÊ’uŒˆ‚ß—p•Ï”
 float angleY = 0 * TO_RAD;
 float angleX = 20 * TO_RAD;
-float radius = 3;
+float radius = 4;
 int swCam = 0;
 VECTOR camPos, lookat(0, 0, 0), up(0, 1, 0);
 float speed = 0.003f;
 
 void createProj()
 {
-    gProj.pers(45 * TO_RAD, width / height, 0.1f, 5);
+    gProj.pers(45 * TO_RAD, width / height, 0.1f, 8);
 }
 
 void updateView() 

@@ -34,7 +34,7 @@ void gmain() {
 
     //-----------------------------------------------------------------------
     //ベクトルaのオリジナルポジションoa
-    VECTOR oa(0.7f, 0, 0);
+    VECTOR oa(1, 0, 0);
     //座標変換後のベクトルa
     VECTOR a;
     VECTOR aTran;//ベクトルaの移動用
@@ -48,7 +48,7 @@ void gmain() {
     VECTOR nTran;//ベクトルnの移動用
     VECTOR nRot;//ベクトルnの回転用
     //説明用平面オリジナルポジションop
-    float l = 0.8f;
+    float l = 1.2f;
     VECTOR op[4] = {
         VECTOR(-l, 0, -l),
         VECTOR(-l, 0, l),
@@ -80,7 +80,7 @@ void gmain() {
 
     //メインループ-------------------------------------------------------------
     while (notQuit) {
-        clear(60);
+        clear(0);
         //カメラ行列を更新
         updateView();
         //表示切替、操作オブジェクト切り替え--------------------------------------
@@ -120,7 +120,7 @@ void gmain() {
         segment(o, a, cyan, 1.5f);
         point(a, cyan);
         segment(o, n * d, red, 3.0f);
-        segment(a, n * d, white, 0.2f);
+        segment(a, n * d, white, 1.0f);
         square(p, gray);
 
         //text info
@@ -146,5 +146,6 @@ void gmain() {
         ++num;
         textSize(60);
         text((let)"内積ｄ:" + d, size * 22, 65);
+        text((let)"acos(d):" + Acos(d)*TO_DEG, size * 44, 65);
     }
 }
