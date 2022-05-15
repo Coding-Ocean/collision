@@ -20,8 +20,8 @@ void createCircle()
     float deg = 360.0f / num;
     for (int i = 0; i < num; i++)
     {
-        opp[i].set(0, Sin(deg * i * TO_RAD), Cos(deg * i * TO_RAD));
-        //opp[i].set(Cos(deg * i * TO_RAD), Sin(deg * i * TO_RAD), 0);
+        //opp[i].set(0, Sin(deg * i * TO_RAD), Cos(deg * i * TO_RAD));
+        opp[i].set(Cos(deg * i * TO_RAD), 0, Sin(deg * i * TO_RAD));
     }
 }
 void circle(const VECTOR& r, const COLOR& c)

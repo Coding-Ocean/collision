@@ -61,11 +61,11 @@ void gmain() {
     COLOR green(0, 255, 0);
     COLOR yellow(255, 255, 60);
     COLOR cyan(0, 255, 255);
-    COLOR gray(128, 128, 128, 190);
+    COLOR gray(128, 128, 128, 128);
 
     //表示フラッグ
     bool dispAxisFlag = true;
-    bool dispSquareFlag = false;
+    bool dispCircleFlag = false;
     //移動回転させるオブジェクトの選択
     int operateObjSw = 1;
     //プロジェクション行列を作っておく
@@ -73,7 +73,7 @@ void gmain() {
     createCircle();
     //メインループ-------------------------------------------------------------
     while (notQuit) {
-        clear(60);
+        clear(0);
         //カメラ行列を更新
         updateView();
         //表示切替、操作オブジェクト切り替え--------------------------------------
@@ -84,11 +84,17 @@ void gmain() {
                 oa.set(1, 0, 0);
                 ob.set(1, 0, 0);
                 aTran = aRot = bTran = bRot = VECTOR(0, 0, 0);
+                dispCircleFlag = false;
             }
             if (isTrigger(KEY_F)) {
                 oa.set(0, 0, -1);
                 ob.set(0, 0, -1);
                 aTran = aRot = bTran = bRot = VECTOR(0, 0, 0);
+                dispCircleFlag = false;
+            }
+            if (isTrigger(KEY_A) || isTrigger(KEY_S) || isTrigger(KEY_D) ||
+                isTrigger(KEY_Q) || isTrigger(KEY_W) || isTrigger(KEY_E)) {
+                dispCircleFlag = true;
             }
         }
         //ベクトルaを動かす---------------------------------------------------------
@@ -97,7 +103,7 @@ void gmain() {
                 input(aTran, aRot, speed);
             }
             world.identity();
-            world.mulTranslate(aTran);
+            //world.mulTranslate(aTran);
             world.mulRotateYXZ(aRot);
             a = world * oa;
         }
@@ -107,7 +113,7 @@ void gmain() {
                 input(bTran, bRot, speed);
             }
             world.identity();
-            world.mulTranslate(bTran);
+            //world.mulTranslate(bTran);
             world.mulRotateYXZ(bRot);
             b = world * ob;
         }
@@ -123,8 +129,15 @@ void gmain() {
         segment(o, a, yellow, thickness);//外積ベクトル表示
         segment(o, b, cyan, thickness);//外積ベクトル表示
         segment(o, c, red, thickness);//外積ベクトル表示
-
-
+        //外積ベクトルと直交する円
+        c.normalize();
+        float radX = Acos(c.y);
+        c.y = 0;
+        c.normalize();
+        float radY = Acos(c.z);
+        if (dispCircleFlag) {
+            circle(VECTOR(radX, radY, 0), gray);
+        }
         //text info
         float size = 30;
         textSize(size);
@@ -141,6 +154,5 @@ void gmain() {
         text("操作対象切換 : Z", 0, ++num * rowH);
         text("位置回転リセット : R", 0, ++num * rowH);
         text("軸表示 : X", 0, ++num * rowH);
-
     }
 }
