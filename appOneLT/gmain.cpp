@@ -4,6 +4,7 @@
 #include"triangle.h"
 #include"axis.h"
 #include"squareWithHole.h"
+#include"circle.h"
 
 void input(VECTOR& tran,VECTOR& rot,float speed)
 {
@@ -60,6 +61,7 @@ void gmain() {
     COLOR green(0, 255, 0);
     COLOR yellow(255, 255, 60);
     COLOR cyan(0, 255, 255);
+    COLOR gray(128, 128, 128, 190);
 
     //表示フラッグ
     bool dispAxisFlag = true;
@@ -68,7 +70,7 @@ void gmain() {
     int operateObjSw = 1;
     //プロジェクション行列を作っておく
     createProj();
-
+    createCircle();
     //メインループ-------------------------------------------------------------
     while (notQuit) {
         clear(60);
@@ -81,7 +83,7 @@ void gmain() {
             if (isTrigger(KEY_R)) {
                 oa.set(1, 0, 0);
                 ob.set(1, 0, 0);
-                aTran=aRot=bTran=bRot=VECTOR(0,0,0);
+                aTran = aRot = bTran = bRot = VECTOR(0, 0, 0);
             }
             if (isTrigger(KEY_F)) {
                 oa.set(0, 0, -1);
@@ -109,37 +111,36 @@ void gmain() {
             world.mulRotateYXZ(bRot);
             b = world * ob;
         }
-        
+
         VECTOR c = cross(a, b);
 
         //描画----------------------------------------------------------------
-            if (dispAxisFlag) { 
-                axis(white, 0.4f); 
-            }
+        if (dispAxisFlag) {
+            axis(white, 0.4f);
+        }
         float thickness = 1.2f;
         VECTOR o(0, 0, 0);
         segment(o, a, yellow, thickness);//外積ベクトル表示
         segment(o, b, cyan, thickness);//外積ベクトル表示
         segment(o, c, red, thickness);//外積ベクトル表示
 
-            
 
-            //text info
-            float size = 30;
-            textSize(size);
-            float rowH = size + 5;//行の高さ
-            int num = 0;//行番号
-            if (operateObjSw == 0)
-                text("ａの", 0, ++num * rowH);
-            else 
-                text("ｂの",0, ++num * rowH);
-            if (isPress(KEY_SHIFT))
-                text("回転 : shift+ADWSQE", size * 2, num * rowH);
-            else 
-                text("移動 : ADWSQE", size*2, rowH);
-            text("操作対象切換 : Z", 0, ++num * rowH);
-            text("位置回転リセット : R", 0, ++num * rowH);
-            text("軸表示 : X", 0, ++num * rowH);
-        
+        //text info
+        float size = 30;
+        textSize(size);
+        float rowH = size + 5;//行の高さ
+        int num = 0;//行番号
+        if (operateObjSw == 0)
+            text("ａの", 0, ++num * rowH);
+        else
+            text("ｂの", 0, ++num * rowH);
+        if (isPress(KEY_SHIFT))
+            text("回転 : shift+ADWSQE", size * 2, num * rowH);
+        else
+            text("移動 : ADWSQE", size * 2, rowH);
+        text("操作対象切換 : Z", 0, ++num * rowH);
+        text("位置回転リセット : R", 0, ++num * rowH);
+        text("軸表示 : X", 0, ++num * rowH);
+
     }
 }
