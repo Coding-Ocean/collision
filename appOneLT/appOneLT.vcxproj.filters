@@ -15,6 +15,7 @@
     <ClCompile Include="view_proj.cpp" />
     <ClCompile Include="wall.cpp" />
     <ClCompile Include="square.cpp" />
+    <ClCompile Include="point.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">
@@ -34,5 +35,6 @@
     <ClInclude Include="view_proj.h" />
     <ClInclude Include="wall.h" />
     <ClInclude Include="square.h" />
+    <ClInclude Include="point.h" />
   </ItemGroup>
 </Project>

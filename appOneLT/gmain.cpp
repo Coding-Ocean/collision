@@ -4,6 +4,7 @@
 #include"triangle.h"
 #include"axis.h"
 #include"square.h"
+#include"point.h"
 
 void input(VECTOR& tran,VECTOR& rot,float speed)
 {
@@ -117,6 +118,7 @@ void gmain() {
         VECTOR o(0, 0, 0);
         segment(o, n, yellow, 1.5f);
         segment(o, a, cyan, 1.5f);
+        point(a, cyan);
         segment(o, n * d, red, 3.0f);
         segment(a, n * d, white, 0.2f);
         square(p, gray);
