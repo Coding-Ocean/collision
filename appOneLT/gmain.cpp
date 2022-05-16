@@ -39,7 +39,7 @@ void gmain() {
     //座標変換後の線分の始点sp、終点ep
     VECTOR sp;
     VECTOR ep;
-    VECTOR segTran(0,0.4f,0);//ベクトルaの移動用
+    VECTOR segTran(0.2f,0.6f,0);//ベクトルaの移動用
     VECTOR segRot;//ベクトルaの回転用
 
     //-----------------------------------------------------------------------
@@ -90,7 +90,7 @@ void gmain() {
         if (isTrigger(KEY_X)) { dispAxisFlag = !dispAxisFlag; }
         if (isTrigger(KEY_Z)) { operateObjSw = 1 - operateObjSw; }
         if (isTrigger(KEY_R)) {
-            segTran.set(0, 0.4f, 0);
+            segTran.set(0.2f, 0.6f, 0);
             segRot = sqTran = sqRot = VECTOR(0, 0, 0);
         }
         //線分を動かす---------------------------------------------------------
@@ -127,7 +127,7 @@ void gmain() {
             float m = d1 / (d1 + d2);
             VECTOR ip = sp * (1 - m) + ep * m;
             VECTOR ofst(0, 0.02f, 0);
-            point(ip, cyan);
+            point(ip, white);
             squareColor = red;
         }
         else {
@@ -137,7 +137,7 @@ void gmain() {
         if (dispAxisFlag) {
             axis(white, 0.4f);
         }
-        segment(sp, ep, yellow, 1.5f);
+        segment(sp, ep, cyan, 1.5f);
         square(p, squareColor);
 
         //text info
