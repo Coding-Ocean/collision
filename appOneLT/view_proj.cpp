@@ -6,7 +6,7 @@
 //行列
 extern MATRIX gView={0}, gProj={0};
 //カメラの位置決め用変数
-float angleY = 30 * TO_RAD;
+float angleY = 20 * TO_RAD;
 float angleX = 20 * TO_RAD;
 float radius = 3;
 int swCam = 0;
@@ -20,11 +20,10 @@ void createProj()
 
 void updateView() 
 {
-
     if (isTrigger(KEY_SPACE)) {
         ++swCam %= 4;
         if (swCam == 0) {
-            angleY = 30 * TO_RAD;
+            angleY = 20 * TO_RAD;
             angleX = 20 * TO_RAD;
         }
     }

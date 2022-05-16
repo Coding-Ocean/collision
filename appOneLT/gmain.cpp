@@ -97,7 +97,7 @@ void gmain() {
                 dispCircleFlag = true;
             }
         }
-        //ベクトルaを動かす---------------------------------------------------------
+        //ベクトルaを動かす----------------------------------------------------
         {
             if (operateObjSw == 0) {
                 input(aTran, aRot, speed);
@@ -107,7 +107,7 @@ void gmain() {
             world.mulRotateYXZ(aRot);
             a = world * oa;
         }
-        //ベクトルbを動かす---------------------------------------------------------
+        //ベクトルbを動かす----------------------------------------------------
         {
             if (operateObjSw == 1) {
                 input(bTran, bRot, speed);
@@ -118,6 +118,7 @@ void gmain() {
             b = world * ob;
         }
 
+        //外積ベクトルを求める--------------------------------------------------
         VECTOR c = cross(a, b);
 
         //描画----------------------------------------------------------------
@@ -134,7 +135,8 @@ void gmain() {
         float radX = Acos(c.y);
         c.y = 0;
         c.normalize();
-        float radY = Acos(c.z);
+        float radY = Atan2(c.x, c.z);
+        text((let)"" + radX*TO_DEG + " " + radY*TO_DEG, 700, 30);
         if (dispCircleFlag) {
             circle(VECTOR(radX, radY, 0), gray);
         }
