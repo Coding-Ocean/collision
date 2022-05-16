@@ -5,6 +5,7 @@
 #include"axis.h"
 #include"square.h"
 #include"point.h"
+
 void input(VECTOR& tran,VECTOR& rot,float speed)
 {
     if (isPress(KEY_SHIFT)) {
@@ -117,20 +118,22 @@ void gmain() {
         for (int i = 0; i < 4; i++) {
             p[i] = world * op[i];
         }
-        //法線を動かす
+        //法線を回転させる。移動してはだめ。
         world.identity();
         world.mulRotateYXZ(sqRot);
         nv = world * onv;
         //衝突判定----------------------------------------------------------------
+        //始点と終点が平面をはさんでいるか
         VECTOR v1 = sp - p[0];
         VECTOR v2 = ep - p[0];
         float d1 = dot(nv, v1);
         float d2 = dot(nv, v2);
+        //d1,d2の符号が違えばはさんでいる
         if (d1 * d2 <= 0) {
+            //内分点ipの座標を求める
             float m = Abs(d1);
             float n = Abs(d2);
             VECTOR ip = (sp * n + ep * m) / (m + n);
-            VECTOR ofst(0, 0.02f, 0);
             point(ip, white);
             squareColor = red;
         }
@@ -145,12 +148,15 @@ void gmain() {
         point(sp, pink);
         point(ep, green);
         square(p, squareColor);
+        //説明用ベクトル
         if (dispVecFlag) {
-            segment(p[0], p[0] + nv, yellow);
-            segment(p[0], sp, white);
-            segment(p[0], ep, white);
+            segment(p[0], p[0] + nv, yellow);//法線
+            segment(p[0], sp, white);//ｓｐへのベクトル
+            segment(p[0], ep, white);//ｅｐへのベクトル
         }
+        //内積の見える化
         if (dispDotFlag) {
+            //重なって見えなくなるので描画順を変える
             if (d1 > 0 && d2 > 0) {
                 segment(p[0], (p[0] + nv * d1), pink, 2);
                 segment(p[0], (p[0] + nv * d2), green, 2);
@@ -180,8 +186,5 @@ void gmain() {
         text("操作対象切換 : Z", 0, ++num * rowH);
         text("位置回転リセット : R", 0, ++num * rowH);
         text("軸表示 : X", 0, ++num * rowH);
-        ++num;
-        textSize(60);
-        //text((let)"内積ｄ:" + d, size * 22, 65);
     }
 }
