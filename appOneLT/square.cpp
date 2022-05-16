@@ -10,6 +10,7 @@ void square(const VECTOR* sqp, const COLOR& c)
         p[i] = gProj * p[i];
     }
     //•`‰æ
-    triangle3D(p[0], p[1], p[2], c, c, c);
-    triangle3D(p[2], p[1], p[3], c, c, c);
+    for (int i = 0; i < 2; i++) {
+        triangle3D(p[0], p[i+1], p[i+2], c, c, c);
+    }
 }

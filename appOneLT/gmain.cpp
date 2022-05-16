@@ -5,7 +5,6 @@
 #include"axis.h"
 #include"square.h"
 #include"point.h"
-
 void input(VECTOR& tran,VECTOR& rot,float speed)
 {
     if (isPress(KEY_SHIFT)) {
@@ -39,26 +38,26 @@ void gmain() {
     //座標変換後の線分の始点sp、終点ep
     VECTOR sp;
     VECTOR ep;
-    VECTOR segTran(0.2f,0.6f,0);//ベクトルaの移動用
+    VECTOR segTran(0.0f,0.6f,0);//ベクトルaの移動用
     VECTOR segRot;//ベクトルaの回転用
 
     //-----------------------------------------------------------------------
     //平面オリジナルポジションop
     float l = 0.8f;
     VECTOR op[4] = {
-        VECTOR(-l, 0, -l),
         VECTOR(-l, 0, l),
-        VECTOR(l, 0, -l),
         VECTOR(l, 0, l),
+        VECTOR(l, 0, -l),
+        VECTOR(-l, 0, -l),
     };
     //座標変換後の平面ポジションsqp
     VECTOR p[4];
     VECTOR sqTran;//ベクトルnの移動用
     VECTOR sqRot;//ベクトルnの回転用
-    //ベクトルｎのオリジナルポジションon
-    VECTOR on(0, 1, 0);
-    //座標変換後のベクトルn
-    VECTOR n;//normal
+    //ベクトルｎのオリジナルポジションonv
+    VECTOR onv(0, 1, 0);//original normal vector
+    //座標変換後のベクトルnv
+    VECTOR nv;//normal vector
  
     //-----------------------------------------------------------------------
     //線分と三角形を座標変換するための共用データ
@@ -70,11 +69,15 @@ void gmain() {
     COLOR yellow(255, 255, 120);
     COLOR cyan(0, 255, 255);
     COLOR white(255, 255, 255);
+    COLOR pink(255, 100, 100);
+    COLOR green(0, 255, 0);
     COLOR squareColor;
-    COLOR gray(128, 128, 128, 190);
-    COLOR red(255, 0, 0, 190);
+    COLOR gray(128, 128, 128, 160);
+    COLOR red(255, 0, 0, 160);
     //表示フラッグ
     bool dispAxisFlag = false;
+    bool dispVecFlag = false;
+    bool dispDotFlag = false;
     //移動回転させるオブジェクトの選択
     int operateObjSw = 0;
     
@@ -88,9 +91,11 @@ void gmain() {
         updateView();
         //表示切替、操作オブジェクト切り替え--------------------------------------
         if (isTrigger(KEY_X)) { dispAxisFlag = !dispAxisFlag; }
+        if (isTrigger(KEY_C)) { dispVecFlag = !dispVecFlag; }
+        if (isTrigger(KEY_V)) { dispDotFlag = !dispDotFlag; }
         if (isTrigger(KEY_Z)) { operateObjSw = 1 - operateObjSw; }
         if (isTrigger(KEY_R)) {
-            segTran.set(0.2f, 0.6f, 0);
+            segTran.set(0.0f, 0.6f, 0);
             segRot = sqTran = sqRot = VECTOR(0, 0, 0);
         }
         //線分を動かす---------------------------------------------------------
@@ -115,17 +120,16 @@ void gmain() {
         //法線を動かす
         world.identity();
         world.mulRotateYXZ(sqRot);
-        n = world * on;
+        nv = world * onv;
         //衝突判定----------------------------------------------------------------
         VECTOR v1 = sp - p[0];
         VECTOR v2 = ep - p[0];
-        float d1 = dot(n, v1);
-        float d2 = dot(n, v2);
+        float d1 = dot(nv, v1);
+        float d2 = dot(nv, v2);
         if (d1 * d2 <= 0) {
-            d1 = Abs(d1);
-            d2 = Abs(d2);
-            float m = d1 / (d1 + d2);
-            VECTOR ip = sp * (1 - m) + ep * m;
+            float m = Abs(d1);
+            float n = Abs(d2);
+            VECTOR ip = (sp * n + ep * m) / (m + n);
             VECTOR ofst(0, 0.02f, 0);
             point(ip, white);
             squareColor = red;
@@ -138,8 +142,24 @@ void gmain() {
             axis(white, 0.4f);
         }
         segment(sp, ep, cyan, 1.5f);
+        point(sp, pink);
+        point(ep, green);
         square(p, squareColor);
-
+        if (dispVecFlag) {
+            segment(p[0], p[0] + nv, yellow);
+            segment(p[0], sp, white);
+            segment(p[0], ep, white);
+        }
+        if (dispDotFlag) {
+            if (d1 > 0 && d2 > 0) {
+                segment(p[0], (p[0] + nv * d1), pink, 2);
+                segment(p[0], (p[0] + nv * d2), green, 2);
+            }
+            else {
+                segment(p[0], (p[0] + nv * d2), green, 2);
+                segment(p[0], (p[0] + nv * d1), pink, 2);
+            }
+        }
         //text info
         float size = 30;
         textSize(size);
