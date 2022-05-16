@@ -5,6 +5,7 @@
 #include"axis.h"
 #include"squareWithHole.h"
 #include"circle.h"
+#include"point.h"
 
 void input(VECTOR& tran,VECTOR& rot,float speed)
 {
@@ -87,9 +88,10 @@ void gmain() {
                 dispCircleFlag = false;
             }
             if (isTrigger(KEY_F)) {
-                oa.set(0, 0, -1);
-                ob.set(0, 0, -1);
+                //oa.set(0, 0, -1);
+                //ob.set(0, 0, -1);
                 aTran = aRot = bTran = bRot = VECTOR(0, 0, 0);
+                aRot.y = bRot.y = 3.1415926f / 2;
                 dispCircleFlag = false;
             }
             if (isTrigger(KEY_A) || isTrigger(KEY_S) || isTrigger(KEY_D) ||
@@ -117,26 +119,26 @@ void gmain() {
             world.mulRotateYXZ(bRot);
             b = world * ob;
         }
-
         //外積ベクトルを求める--------------------------------------------------
         VECTOR c = cross(a, b);
-
         //描画----------------------------------------------------------------
         if (dispAxisFlag) {
             axis(white, 0.4f);
         }
-        float thickness = 1.2f;
+        float thickness = 2.2f;
         VECTOR o(0, 0, 0);
-        segment(o, a, yellow, thickness);//外積ベクトル表示
-        segment(o, b, cyan, thickness);//外積ベクトル表示
-        segment(o, c, red, thickness);//外積ベクトル表示
+        segment(o, a, yellow, thickness);//ベクトルa表示
+        point(a, yellow);
+        segment(o, b, cyan, thickness);//ベクトルb表示
+        point(b, cyan);
+        segment(o, c, red, thickness);//外積ベクトルc
+        point(c, red);
         //外積ベクトルと直交する円
         c.normalize();
         float radX = Acos(c.y);
         c.y = 0;
         c.normalize();
         float radY = Atan2(c.x, c.z);
-        text((let)"" + radX*TO_DEG + " " + radY*TO_DEG, 700, 30);
         if (dispCircleFlag) {
             circle(VECTOR(radX, radY, 0), gray);
         }
@@ -156,5 +158,7 @@ void gmain() {
         text("操作対象切換 : Z", 0, ++num * rowH);
         text("位置回転リセット : R", 0, ++num * rowH);
         text("軸表示 : X", 0, ++num * rowH);
+        text((let)"acos(dot(a,b)):" + Acos(dot(a, b))*TO_DEG, 700, 30);
+        text((let)"" + radX*TO_DEG + " " + radY*TO_DEG, 1600, 30);
     }
 }
