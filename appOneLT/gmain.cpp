@@ -7,25 +7,42 @@
 #include"circle.h"
 #include"point.h"
 
+//外積ベクトルが法線となる円を描画。元の円は真上を向いている円
+void circle(VECTOR n) {
+    //円の頂点をｘ軸回転させる角度-----------------------------
+    n.normalize();
+    //VECTOR(0,1,0)とｎの内積はcosΘ。つまりn.yとなる
+    float radX = Acos(n.y);
+    //円の頂点をｙ軸回転させる角度------------------------------
+    n.y = 0;//２次元ベクトル化。（ｘ、ｚ平面で考える）
+    n.normalize();
+    //底辺はdot(VECTOR(0,0,1),n)=n.z;
+    //高さはcross(VECTOR(0,0,1),n)=n.x;
+    float radY = Atan2(n.x, n.z);
+    circle(VECTOR(radX, radY, 0), COLOR(128, 128, 128, 128));
+}
+
 void input(VECTOR& tran,VECTOR& rot,float speed)
 {
+    tran.set(0, 0, 0);
+    rot.set(0, 0, 0);
     if (isPress(KEY_SHIFT)) {
         //回転
-        if (isPress(KEY_D)) { rot.y -= speed; }
-        if (isPress(KEY_A)) { rot.y += speed; }
-        if (isPress(KEY_W)) { rot.x += speed; }
-        if (isPress(KEY_S)) { rot.x -= speed; }
-        if (isPress(KEY_Q)) { rot.z += speed; }
-        if (isPress(KEY_E)) { rot.z -= speed; }
+        if (isPress(KEY_D)) { rot.y = -speed; }
+        if (isPress(KEY_A)) { rot.y = speed; }
+        if (isPress(KEY_W)) { rot.x = speed; }
+        if (isPress(KEY_S)) { rot.x = -speed; }
+        if (isPress(KEY_Q)) { rot.z = speed; }
+        if (isPress(KEY_E)) { rot.z = -speed; }
     }
     else {
         //移動
-        if (isPress(KEY_D)) { tran.x += speed; }
-        if (isPress(KEY_A)) { tran.x -= speed; }
-        if (isPress(KEY_W)) { tran.z -= speed; }
-        if (isPress(KEY_S)) { tran.z += speed; }
-        if (isPress(KEY_Q)) { tran.y += speed; }
-        if (isPress(KEY_E)) { tran.y -= speed; }
+        if (isPress(KEY_D)) { tran.x = speed; }
+        if (isPress(KEY_A)) { tran.x = -speed; }
+        if (isPress(KEY_W)) { tran.z = -speed; }
+        if (isPress(KEY_S)) { tran.z = speed; }
+        if (isPress(KEY_Q)) { tran.y = speed; }
+        if (isPress(KEY_E)) { tran.y = -speed; }
     }
 }
 
@@ -34,18 +51,13 @@ void gmain() {
     hideCursor();
 
     //-----------------------------------------------------------------------
-    //ベクトルaのオリジナルポジションoa
-    VECTOR oa(1.0f, 0, 0);//original vector a
-    //ベクトルaの座標変換後のポジションa
-    VECTOR a;//vector a
+    //ベクトルa
+    VECTOR a(1.0f, 0, 0);
     VECTOR aTran;
     VECTOR aRot;
- 
     //-----------------------------------------------------------------------
-    //ベクトルbのオリジナルポジションob
-    VECTOR ob(1.0f, 0, 0);//original vector b
-    //ベクトルaの座標変換後のポジションa
-    VECTOR b;//vector a
+    //ベクトルb
+    VECTOR b(1.0f, 0, 0);
     VECTOR bTran;
     VECTOR bRot;
 
@@ -82,16 +94,13 @@ void gmain() {
             if (isTrigger(KEY_X)) { dispAxisFlag = !dispAxisFlag; }
             if (isTrigger(KEY_Z)) { operateObjSw = 1 - operateObjSw; }
             if (isTrigger(KEY_R)) {
-                oa.set(1, 0, 0);
-                ob.set(1, 0, 0);
-                aTran = aRot = bTran = bRot = VECTOR(0, 0, 0);
+                a.set(1, 0, 0);
+                b.set(1, 0, 0);
                 dispCircleFlag = false;
             }
             if (isTrigger(KEY_F)) {
-                //oa.set(0, 0, -1);
-                //ob.set(0, 0, -1);
-                aTran = aRot = bTran = bRot = VECTOR(0, 0, 0);
-                aRot.y = bRot.y = 3.1415926f / 2;
+                a.set(0, 0, -1);
+                b.set(0, 0, -1);
                 dispCircleFlag = false;
             }
             if (isTrigger(KEY_A) || isTrigger(KEY_S) || isTrigger(KEY_D) ||
@@ -107,7 +116,7 @@ void gmain() {
             world.identity();
             //world.mulTranslate(aTran);
             world.mulRotateYXZ(aRot);
-            a = world * oa;
+            a = world * a;
         }
         //ベクトルbを動かす----------------------------------------------------
         {
@@ -117,7 +126,7 @@ void gmain() {
             world.identity();
             //world.mulTranslate(bTran);
             world.mulRotateYXZ(bRot);
-            b = world * ob;
+            b = world * b;
         }
         //外積ベクトルを求める--------------------------------------------------
         VECTOR c = cross(a, b);
@@ -133,14 +142,8 @@ void gmain() {
         point(b, cyan);
         segment(o, c, red, thickness);//外積ベクトルc
         point(c, red);
-        //外積ベクトルと直交する円
-        c.normalize();
-        float radX = Acos(c.y);
-        c.y = 0;
-        c.normalize();
-        float radY = Atan2(c.x, c.z);
         if (dispCircleFlag) {
-            circle(VECTOR(radX, radY, 0), gray);
+            circle(c);
         }
         //text info
         float size = 30;
@@ -158,7 +161,9 @@ void gmain() {
         text("操作対象切換 : Z", 0, ++num * rowH);
         text("位置回転リセット : R", 0, ++num * rowH);
         text("軸表示 : X", 0, ++num * rowH);
+
         text((let)"acos(dot(a,b)):" + Acos(dot(a, b))*TO_DEG, 700, 30);
-        text((let)"" + radX*TO_DEG + " " + radY*TO_DEG, 1600, 30);
+        text((let)"c mag:" + c.mag(), 700, 100);
+        text((let)"sin  :" + Sin(Acos(dot(a, b))), 700, 150);
     }
 }
