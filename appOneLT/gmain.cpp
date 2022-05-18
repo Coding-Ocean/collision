@@ -7,21 +7,6 @@
 #include"circle.h"
 #include"point.h"
 
-//外積ベクトルが法線となる円を描画。元の円は真上を向いている円
-void circle(VECTOR n) {
-    //円の頂点をｘ軸回転させる角度-----------------------------
-    n.normalize();
-    //VECTOR(0,1,0)とｎの内積はcosΘ。つまりn.yとなる
-    float radX = Acos(n.y);
-    //円の頂点をｙ軸回転させる角度------------------------------
-    n.y = 0;//２次元ベクトル化。（ｘ、ｚ平面で考える）
-    n.normalize();
-    //底辺はdot(VECTOR(0,0,1),n)=n.z;
-    //高さはcross(VECTOR(0,0,1),n)=n.x;
-    float radY = Atan2(n.x, n.z);
-    circle(VECTOR(radX, radY, 0), COLOR(128, 128, 128, 128));
-}
-
 void input(VECTOR& tran,VECTOR& rot,float speed)
 {
     tran.set(0, 0, 0);
@@ -53,12 +38,12 @@ void gmain() {
     //-----------------------------------------------------------------------
     //ベクトルa
     VECTOR a(1.0f, 0, 0);
-    VECTOR aTran;
+    VECTOR aTran;//このプログラムでは使用しない
     VECTOR aRot;
     //-----------------------------------------------------------------------
     //ベクトルb
     VECTOR b(1.0f, 0, 0);
-    VECTOR bTran;
+    VECTOR bTran;//このプログラムでは使用しない
     VECTOR bRot;
 
     //-----------------------------------------------------------------------
@@ -80,9 +65,10 @@ void gmain() {
     bool dispAxisFlag = true;
     bool dispCircleFlag = false;
     //移動回転させるオブジェクトの選択
-    int operateObjSw = 1;
+    int operateObjSw = 0;
     //プロジェクション行列を作っておく
     createProj();
+    //円を作っておく
     createCircle();
     //メインループ-------------------------------------------------------------
     while (notQuit) {
@@ -143,7 +129,7 @@ void gmain() {
         segment(o, c, red, thickness);//外積ベクトルc
         point(c, red);
         if (dispCircleFlag) {
-            circle(c);
+            circleQt(c, gray);//外積方向を向いた円の描画
         }
         //text info
         float size = 30;
@@ -162,8 +148,9 @@ void gmain() {
         text("位置回転リセット : R", 0, ++num * rowH);
         text("軸表示 : X", 0, ++num * rowH);
 
-        text((let)"acos(dot(a,b)):" + Acos(dot(a, b))*TO_DEG, 700, 30);
-        text((let)"c mag:" + c.mag(), 700, 100);
-        text((let)"sin  :" + Sin(Acos(dot(a, b))), 700, 150);
+        //num = 0;
+        //text((let)"acos(dot(a,b)):" + Acos(dot(a, b)) * TO_DEG, 700, ++num * rowH);
+        //text((let)"c mag:" + c.mag(), 700, ++num * rowH);
+        //text((let)"sin  :" + Sin(Acos(dot(a, b))), 700, ++num * rowH);
     }
 }
