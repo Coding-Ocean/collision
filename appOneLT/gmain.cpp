@@ -58,7 +58,8 @@ void gmain() {
     VECTOR nv;
     VECTOR triTran;//三角形の移動用 triangle translate
     VECTOR triRot;//三角形の回転用 triangle rotate
- 
+    //平面と線分の交点
+    VECTOR ip;
     //-----------------------------------------------------------------------
     //線分と三角形を座標変換するための共用データ
     MATRIX world;
@@ -67,7 +68,8 @@ void gmain() {
     //その他------------------------------------------------------------------
     //色
     COLOR red(255, 0, 0, 200);
-    COLOR orange(255, 150, 0, 230);
+    COLOR grayLight(150, 150, 150, 230);
+    COLOR gray(128, 128, 128, 160);
     COLOR white(255, 255, 255);
     COLOR green(0, 255, 0);
     COLOR yellow(255, 255, 60);
@@ -132,7 +134,7 @@ void gmain() {
         //当たり判定----------------------------------------------------------
         {
             dispSquareFlag = false;//三角形を含む平面と交差したらフラッグを立てる
-            triColor = orange;//交差していないとき橙
+            triColor = grayLight;//交差していないとき橙
             //「三角形を含む平面」と「線分」が交差しているか
             VECTOR v1 = sp - p[0];
             VECTOR v2 = ep - p[0];
@@ -143,8 +145,7 @@ void gmain() {
                 //平面と線分が交差している点の座標ip
                 float m = Abs(d1);
                 float n = Abs(d2);
-                VECTOR ip = (sp * n + ep * m) / (m + n);//内分点の座標ip
-                point(ip, white);
+                ip = (sp * n + ep * m) / (m + n);//内分点の座標ip
                 //ipが三角形に含まれているか
                 bool containFlag = true;//とりあえず含まれていることにする
                 for (int i = 0; i < 3; i++) {
@@ -163,7 +164,7 @@ void gmain() {
                         segment(p[i], ip, crossColor[i], thickness);//交点までのベクトル
                     }
                 }
-                if (containFlag == 1) {//三角形と交差している
+                if (containFlag) {//三角形と交差している
                     triColor = red;
                 }
             }
@@ -177,7 +178,8 @@ void gmain() {
             segment(sp, ep, white, 1.5f);
             
             if (dispSquareFlag) { 
-                squareWithHole(triTran, triRot, COLOR(128, 128, 128, 160)); 
+                point(ip, white);
+                squareWithHole(triTran, triRot, gray);
             }
             
             triangle(p, triColor);
