@@ -31,20 +31,20 @@ void input(VECTOR& t, VECTOR& r, float moveSpeed, float angSpeed)
 
 void gmain()
 {
-	window(1000, 1000);
+	window(1920, 1080, full);
 	//ê¸ï™
-	VECTOR oa(0, 2);
-	VECTOR ob(0, -2);
+	VECTOR oa(0, 0.25f);
+	VECTOR ob(0, -0.25f);
 	VECTOR a, b;
-	VECTOR sTran(0,3), sRot;
+	VECTOR sTran(0.5f,0.5f), sRot;
 	//íºê¸Ç∆êÇê¸
-	VECTOR oc(6, 0);
-	VECTOR od(-6, 0);
+	VECTOR oc(1, 0);
+	VECTOR od(-1, 0);
 	VECTOR ovn(0, 1);
 	VECTOR c, d, vn;
 	VECTOR lTran, lRot;
 
-	float moveSpeed = 0.03f;
+	float moveSpeed = 0.003f;
 	float angSpeed = 0.005f;
 	MATRIX world;
 
@@ -55,7 +55,7 @@ void gmain()
 	while (notQuit)
 	{
 		clear(0, 50, 0);
-		mathAxis(8.1f, 255);
+		mathAxis(2.1f, 255);
 		//ëÄçÏëŒè€êÿä∑
 		if (isTrigger(KEY_Z))operateObjSw = 1 - operateObjSw;
 		//ê¸ï™
@@ -91,13 +91,18 @@ void gmain()
 			float m = Abs(d1);
 			float n = Abs(d2);
 			VECTOR p = (a * n + b * m) / (m + n);
-			mathPoint(p, COLOR(255, 0, 0), 30 );
+			mathPoint(p, COLOR(255, 0, 0), 30);
 		}
-		VECTOR ofst(0.03f, 0, 0);
-		mathSegment(lTran, lTran + vn + ofst, COLOR(255, 255, 0), 3);
-		mathSegment(lTran, lTran + vn*d1, COLOR(255, 200, 200), 3);
+
+		VECTOR ofst(0, 0, 0);
+		mathSegment(lTran + ofst, lTran + vn + ofst, COLOR(255, 255, 0), 3);
+
+		mathSegment(lTran + v1, lTran + vn * d1, COLOR(255, 200, 200), 3);
+		mathSegment(lTran, lTran + vn * d1, COLOR(255, 200, 200), 3);
 		mathSegment(lTran, lTran + v1, COLOR(255, 200, 200), 3);
-		mathSegment(lTran-ofst, lTran + vn * d2 -ofst, COLOR(0, 255, 0), 3);
+
+		mathSegment(lTran + v2, lTran + vn * d2 - ofst, COLOR(0, 255, 0), 3);
+		mathSegment(lTran - ofst, lTran + vn * d2 - ofst, COLOR(0, 255, 0), 3);
 		mathSegment(lTran, lTran + v2, COLOR(0, 255, 0), 3);
 	}
 }
