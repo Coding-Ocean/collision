@@ -146,8 +146,7 @@ void gmain() {
         point(ep, green);
         square(p, squareColor);
         //説明用ベクトル描画
-        //線分が重なっているとき見やすくするためにずらす値
-        VECTOR ofst(-0.006f, 0, 0);
+        VECTOR ofst(0, 0, 0);
         if (isTrigger(KEY_C))++dispSw %= 6;
         switch (dispSw) {
         case 5:
