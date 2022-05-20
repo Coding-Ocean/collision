@@ -59,7 +59,9 @@ void gmain() {
     VECTOR onv(0, 1, 0);//original normal vector
     //座標変換後のベクトルnv
     VECTOR nv;//normal vector
- 
+    //交点の座標
+    VECTOR ip;
+
     //-----------------------------------------------------------------------
     //線分と三角形を座標変換するための共用データ
     MATRIX world;
@@ -78,6 +80,7 @@ void gmain() {
     COLOR red(255, 0, 0, 160);
     //表示フラッグ
     bool dispAxisFlag = false;
+    bool dispIpFlag = false;
     //表示スィッチ
     int dispSw = 0;
     //移動回転させるオブジェクトの選択
@@ -132,18 +135,20 @@ void gmain() {
             //内分点ipの座標を求める
             float m = Abs(d1);
             float n = Abs(d2);
-            VECTOR ip = (sp * n + ep * m) / (m + n);
-            point(ip, white);
+            ip = (sp * n + ep * m) / (m + n);
             squareColor = red;
+            dispIpFlag = true;
         }
         else {
             squareColor = gray;
+            dispIpFlag = false;
         }
         //描画----------------------------------------------------------------
         if (dispAxisFlag) axis(white, 0.4f);
         segment(sp, ep, cyan, 1.5f);
         point(sp, pink);
         point(ep, green);
+        if(dispIpFlag)point(ip, white);
         square(p, squareColor);
         //説明用ベクトル描画
         VECTOR ofst(0, 0, 0);
@@ -174,11 +179,12 @@ void gmain() {
         else
             text("平面の", colL, ++num * rowH);
         if (isPress(KEY_SHIFT))
-            text("回転 : shift+ADWSQE", size * 3, num * rowH);
+            text("回転 : shift+ADWSQE", colL+size * 3, num * rowH);
         else
-            text("移動 : ADWSQE", size * 3, rowH);
+            text("移動 : ADWSQE", colL+size * 3, rowH);
         text("操作対象切換 : Z", colL, ++num * rowH);
         text("位置回転リセット : R", colL, ++num * rowH);
         text("軸表示 : X", colL, ++num * rowH);
+        text((let)"d1 * d2 = " + d1 * d2, 800, rowH);
     }
 }
