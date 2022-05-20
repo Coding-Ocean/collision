@@ -70,6 +70,7 @@ void gmain() {
     COLOR yellow(255, 255, 120);
     COLOR cyan(0, 255, 255);
     COLOR white(255, 255, 255);
+    COLOR white2(160, 160, 160);
     COLOR pink(255, 100, 100);
     COLOR green(0, 255, 0);
     COLOR squareColor;
@@ -77,8 +78,8 @@ void gmain() {
     COLOR red(255, 0, 0, 160);
     //表示フラッグ
     bool dispAxisFlag = false;
-    bool dispVecFlag = false;
-    bool dispDotFlag = false;
+    //表示スィッチ
+    int dispSw = 0;
     //移動回転させるオブジェクトの選択
     int operateObjSw = 0;
     
@@ -92,8 +93,6 @@ void gmain() {
         updateView();
         //表示切替、操作オブジェクト切り替え--------------------------------------
         if (isTrigger(KEY_X)) { dispAxisFlag = !dispAxisFlag; }
-        if (isTrigger(KEY_C)) { dispVecFlag = !dispVecFlag; }
-        if (isTrigger(KEY_V)) { dispDotFlag = !dispDotFlag; }
         if (isTrigger(KEY_Z)) { operateObjSw = 1 - operateObjSw; }
         if (isTrigger(KEY_R)) {
             segTran.set(0.0f, 0.6f, 0);
@@ -141,50 +140,47 @@ void gmain() {
             squareColor = gray;
         }
         //描画----------------------------------------------------------------
-        if (dispAxisFlag) {
-            axis(white, 0.4f);
-        }
+        if (dispAxisFlag) axis(white, 0.4f);
         segment(sp, ep, cyan, 1.5f);
         point(sp, pink);
         point(ep, green);
         square(p, squareColor);
-        //説明用ベクトル
-        if (dispVecFlag) {
+        //説明用ベクトル描画
+        //線分が重なっているとき見やすくするためにずらす値
+        VECTOR ofst(-0.006f, 0, 0);
+        if (isTrigger(KEY_C))++dispSw %= 6;
+        switch (dispSw) {
+        case 5:
+            segment(ep, (p[0] + nv * d2), green);
+            segment(p[0] + ofst * 2, (p[0] + nv * d2) + ofst * 2, green, 2);
+            //}
+        case 4:
+            segment(sp, (p[0] + nv * d1), pink, 0.5f);
+            segment(p[0] + ofst, (p[0] + nv * d1) + ofst, pink, 2);
+        case 3:
             segment(p[0], p[0] + nv, yellow);//法線
-            segment(p[0], sp, white);//ｓｐへのベクトル
-            segment(p[0], ep, white);//ｅｐへのベクトル
+        case 2:
+            segment(p[0], ep, green, 2);//ｅｐへのベクトル
+        case 1:
+            segment(p[0], sp, pink, 2);//ｓｐへのベクトル
         }
-        //内積の見える化
-        if (dispDotFlag) {
-            //重なって見えなくなるので描画順を変える
-            if (d1 > 0 && d2 > 0) {
-                segment(p[0], (p[0] + nv * d1), pink, 2);
-                segment(p[0], (p[0] + nv * d2), green, 2);
-            }
-            else {
-                segment(p[0], (p[0] + nv * d2), green, 2);
-                segment(p[0], (p[0] + nv * d1), pink, 2);
-            }
-        }
-        //text info
+        //テキスト情報
         float size = 30;
         textSize(size);
         fill(255);
-        float rowH = size + 5;//行の高さ
+        float colL = 10;//列の左側
+        float rowH = size + 10;//行の高さ
         int num = 0;//行番号
-
         if (operateObjSw == 0)
-            text("線分の", 0, ++num * rowH);
+            text("線分の", colL, ++num * rowH);
         else
-            text("平面の", 0, ++num * rowH);
-
+            text("平面の", colL, ++num * rowH);
         if (isPress(KEY_SHIFT))
             text("回転 : shift+ADWSQE", size * 3, num * rowH);
         else
             text("移動 : ADWSQE", size * 3, rowH);
-
-        text("操作対象切換 : Z", 0, ++num * rowH);
-        text("位置回転リセット : R", 0, ++num * rowH);
-        text("軸表示 : X", 0, ++num * rowH);
+        text("操作対象切換 : Z", colL, ++num * rowH);
+        text("位置回転リセット : R", colL, ++num * rowH);
+        text("軸表示 : X", colL, ++num * rowH);
     }
 }
