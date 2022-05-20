@@ -117,12 +117,11 @@ void gmain() {
         //外積ベクトルを求める--------------------------------------------------
         VECTOR c = cross(a, b);
         //描画----------------------------------------------------------------
-        if (dispAxisFlag) {
-            axis(white, 0.4f);
-        }
+        if (dispAxisFlag) axis(white, 0.6f);
         float thickness = 2.2f;
         VECTOR o(0, 0, 0);
         segment(o, a, yellow, thickness);//ベクトルa表示
+        if(!dispAxisFlag)segment(o, -a, yellow, thickness/3);//ベクトルa表示
         point(a, yellow);
         segment(o, b, cyan, thickness);//ベクトルb表示
         point(b, cyan);
@@ -134,19 +133,20 @@ void gmain() {
         //text info
         float size = 30;
         textSize(size);
-        float rowH = size + 5;//行の高さ
+        float colL = 10;
+        float rowH = size + 10;//行の高さ
         int num = 0;//行番号
         if (operateObjSw == 0)
-            text("ａの", 0, ++num * rowH);
+            text("ａの", colL, ++num * rowH);
         else
-            text("ｂの", 0, ++num * rowH);
+            text("ｂの", colL, ++num * rowH);
         if (isPress(KEY_SHIFT))
-            text("回転 : shift+ADWSQE", size * 2, num * rowH);
+            text("回転 : shift+ADWSQE", colL + size * 2, num * rowH);
         else
-            text("移動 : ADWSQE", size * 2, rowH);
-        text("操作対象切換 : Z", 0, ++num * rowH);
-        text("位置回転リセット : R", 0, ++num * rowH);
-        text("軸表示 : X", 0, ++num * rowH);
+            text("移動 : ADWSQE", colL + size * 2, rowH);
+        text("操作対象切換 : Z", colL, ++num * rowH);
+        text("位置回転リセット : R", colL, ++num * rowH);
+        text("軸表示 : X", colL, ++num * rowH);
 
         //num = 0;
         //text((let)"acos(dot(a,b)):" + Acos(dot(a, b)) * TO_DEG, 700, ++num * rowH);

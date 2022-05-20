@@ -1,10 +1,10 @@
 #include"view_proj.h"
 #include"graphic.h"
-#include"VECTOR.h"
+#include"MATRIX.h"
 #include"mathUtil.h"
 #include"QUATERNION.h"
 
-static const int num = 36;
+static const int num = 72;
 static VECTOR op[num];
 
 void createCircle()
