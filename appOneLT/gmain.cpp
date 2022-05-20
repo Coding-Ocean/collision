@@ -39,7 +39,7 @@ void gmain() {
     //座標変換後の線分の始点sp、終点ep
     VECTOR sp;
     VECTOR ep;
-    VECTOR segTran(0.0f,0.6f,0);//ベクトルaの移動用
+    VECTOR segTran(0.6f,0.6f,0);//ベクトルaの移動用
     VECTOR segRot;//ベクトルaの回転用
 
     //-----------------------------------------------------------------------
@@ -95,7 +95,7 @@ void gmain() {
         if (isTrigger(KEY_X)) { dispAxisFlag = !dispAxisFlag; }
         if (isTrigger(KEY_Z)) { operateObjSw = 1 - operateObjSw; }
         if (isTrigger(KEY_R)) {
-            segTran.set(0.0f, 0.6f, 0);
+            segTran.set(0.6f, 0.6f, 0);
             segRot = sqTran = sqRot = VECTOR(0, 0, 0);
         }
         //線分を動かす---------------------------------------------------------
@@ -123,8 +123,8 @@ void gmain() {
         nv = world * onv;
         //衝突判定----------------------------------------------------------------
         //始点と終点が平面をはさんでいるか
-        VECTOR v1 = sp - p[0];
-        VECTOR v2 = ep - p[0];
+        VECTOR v1 = sp - sqTran;
+        VECTOR v2 = ep - sqTran;
         float d1 = dot(nv, v1);
         float d2 = dot(nv, v2);
         //d1,d2の符号が違えばはさんでいる
@@ -151,18 +151,17 @@ void gmain() {
         if (isTrigger(KEY_C))++dispSw %= 6;
         switch (dispSw) {
         case 5:
-            segment(ep, (p[0] + nv * d2), green);
-            segment(p[0] + ofst * 2, (p[0] + nv * d2) + ofst * 2, green, 2);
-            //}
+            segment(ep, (sqTran + nv * d2), green);
+            segment(sqTran + ofst * 2, (sqTran + nv * d2) + ofst * 2, green, 2);
         case 4:
-            segment(sp, (p[0] + nv * d1), pink, 0.5f);
-            segment(p[0] + ofst, (p[0] + nv * d1) + ofst, pink, 2);
+            segment(sp, (sqTran + nv * d1), pink, 0.5f);
+            segment(sqTran + ofst, (sqTran + nv * d1) + ofst, pink, 2);
         case 3:
-            segment(p[0], p[0] + nv, yellow);//法線
+            segment(sqTran, sqTran + nv, yellow);//法線
         case 2:
-            segment(p[0], ep, green, 2);//ｅｐへのベクトル
+            segment(sqTran, ep, green, 2);//ｅｐへのベクトル
         case 1:
-            segment(p[0], sp, pink, 2);//ｓｐへのベクトル
+            segment(sqTran, sp, pink, 2);//ｓｐへのベクトル
         }
         //テキスト情報
         float size = 30;
