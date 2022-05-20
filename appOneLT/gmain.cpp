@@ -43,12 +43,20 @@ void gmain()
 	VECTOR ovn(0, 1);
 	VECTOR c, d, vn;
 	VECTOR lTran, lRot;
+	//交点の座標
+	VECTOR ip;
 
-	float moveSpeed = 0.003f;
-	float angSpeed = 0.005f;
+	float moveSpeed = 0.006f;
+	float angSpeed = 0.01f;
 	MATRIX world;
 
+	bool dispPointFlag = false;
+	int dispSegSw = 0;
 	int operateObjSw = 0;
+
+	COLOR lineColor;
+	COLOR gray(128, 128, 128);
+	COLOR red(255,0,0);
 
 	axisMode(NODRAW);
 	
@@ -66,7 +74,6 @@ void gmain()
 		world.mulRotateZ(sRot.z);
 		a = world * oa;
 		b = world * ob;
-		mathSegment(a, b, COLOR(255, 255, 255), 10);
 		//直線
 		if (operateObjSw == 1) {
 			input(lTran, lRot, moveSpeed, angSpeed);
@@ -75,7 +82,6 @@ void gmain()
 		world.mulRotateZ(lRot.z);
 		c = world * oc;
 		d = world * od;
-		mathSegment(c, d, COLOR(128, 128, 128), 10);
 		//直線の垂線ベクトル
 		world.rotateZ(lRot.z);
 		vn = world * ovn;
@@ -85,24 +91,58 @@ void gmain()
 		VECTOR v2 = b - lTran;
 		float d1 = dot(vn, v1);
 		float d2 = dot(vn, v2);
-		if (d1 * d2 <= 0)
-		{
+		if (d1 * d2 <= 0){
 			//交点の座標（内分点）
 			float m = Abs(d1);
 			float n = Abs(d2);
-			VECTOR p = (a * n + b * m) / (m + n);
-			mathPoint(p, COLOR(255, 0, 0), 30);
+			ip = (a * n + b * m) / (m + n);
+			lineColor = red;
+			dispPointFlag = true;
 		}
-
-		VECTOR ofst(0, 0, 0);
-		mathSegment(lTran + ofst, lTran + vn + ofst, COLOR(255, 255, 0), 3);
-
-		mathSegment(lTran + v1, lTran + vn * d1, COLOR(255, 200, 200), 3);
-		mathSegment(lTran, lTran + vn * d1, COLOR(255, 200, 200), 3);
-		mathSegment(lTran, lTran + v1, COLOR(255, 200, 200), 3);
-
-		mathSegment(lTran + v2, lTran + vn * d2 - ofst, COLOR(0, 255, 0), 3);
-		mathSegment(lTran - ofst, lTran + vn * d2 - ofst, COLOR(0, 255, 0), 3);
-		mathSegment(lTran, lTran + v2, COLOR(0, 255, 0), 3);
+		else {
+			lineColor = gray;
+			dispPointFlag = false;
+		}
+		//描画
+		mathSegment(c, d, lineColor, 10);
+		mathSegment(a, b, COLOR(220, 220, 220), 10);
+		mathPoint(a, COLOR(255, 180, 180), 20);
+		mathPoint(b, COLOR(0, 255, 0), 20);
+		if (dispPointFlag) {
+			mathPoint(ip, COLOR(255, 255, 0), 20);
+		}
+		//解説用ベクトル描画
+		if (isTrigger(KEY_C))++dispSegSw %= 6;
+		switch (dispSegSw) {
+		case 1:
+			mathSegment(lTran, lTran + v1, COLOR(255, 200, 200), 3);
+			break;
+		case 2:
+			mathSegment(lTran, lTran + v1, COLOR(255, 200, 200), 3);
+			mathSegment(lTran, lTran + v2, COLOR(0, 255, 0), 3);
+			break;
+		case 3:
+			mathSegment(lTran, lTran + v1, COLOR(255, 200, 200), 3);
+			mathSegment(lTran, lTran + v2, COLOR(0, 255, 0), 3);
+			mathSegment(lTran, lTran + vn, COLOR(255, 255, 0), 3);
+			break;
+		case 4:
+			mathSegment(lTran, lTran + v1, COLOR(255, 200, 200), 3);
+			mathSegment(lTran, lTran + v2, COLOR(0, 255, 0), 3);
+			mathSegment(lTran, lTran + vn, COLOR(255, 255, 0), 3);
+			mathSegment(lTran, lTran + vn * d1, COLOR(255, 200, 200), 3);
+			mathSegment(lTran + v1, lTran + vn * d1, COLOR(255, 200, 200), 3);
+			break;
+		case 5:
+			mathSegment(lTran, lTran + v1, COLOR(255, 200, 200), 3);
+			mathSegment(lTran, lTran + v2, COLOR(0, 255, 0), 3);
+			mathSegment(lTran, lTran + vn, COLOR(255, 255, 0), 3);
+			mathSegment(lTran, lTran + vn * d1, COLOR(255, 200, 200), 3);
+			mathSegment(lTran + v1, lTran + vn * d1, COLOR(255, 200, 200), 3);
+			mathSegment(lTran, lTran + vn * d2, COLOR(0, 255, 0), 3);
+			mathSegment(lTran + v2, lTran + vn * d2, COLOR(0, 255, 0), 3);
+		}
+		textSize(50);
+		text((let)"d1 * d2 = " + d1 * d2, 800, 60);
 	}
 }
