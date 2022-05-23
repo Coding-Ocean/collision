@@ -34,8 +34,8 @@ void gmain() {
 
     //-----------------------------------------------------------------------
     //線分のオリジナルポジションosp,oep
-    VECTOR osp(0,  0.2f, 0);//original start point
-    VECTOR oep(0, -0.2f, 0);//original end point
+    VECTOR osp(0,  0, 0);//original start point
+    VECTOR oep(0, -0.7f, 0);//original end point
     //線分の座標変換後のポジションsp,ep
     VECTOR sp;//start point
     VECTOR ep;//end point
@@ -58,12 +58,13 @@ void gmain() {
     VECTOR nv;
     VECTOR triTran;//三角形の移動用 triangle translate
     VECTOR triRot;//三角形の回転用 triangle rotate
-    //平面と線分の交点
-    VECTOR ip;
     //-----------------------------------------------------------------------
     //線分と三角形を座標変換するための共用データ
     MATRIX world;
     float speed = 0.003f;
+    //-----------------------------------------------------------------------
+    //点から三角ポリゴンを含む無限平面までの距離
+    float distance = 0;
 
     //その他------------------------------------------------------------------
     //色
@@ -80,7 +81,7 @@ void gmain() {
 
     //表示フラッグ
     bool dispAxisFlag = false;
-    bool dispSquareFlag = false;
+    bool dispSquareFlag = true;
     bool dispCrossFlag = false;
     //移動回転させるオブジェクトの選択
     int operateObjSw = 0;
@@ -133,40 +134,28 @@ void gmain() {
         }
         //当たり判定----------------------------------------------------------
         {
-            dispSquareFlag = false;//三角形を含む平面と交差したらフラッグを立てる
+            distance = dot(nv, sp - p[0]);
+
             triColor = grayLight;//交差していないとき橙
-            //「三角形を含む平面」と「線分」が交差しているか
-            VECTOR v1 = sp - p[0];
-            VECTOR v2 = ep - p[0];
-            float d1 = dot(nv, v1);
-            float d2 = dot(nv, v2);
-            if (d1 * d2 <= 0) {//←「三角形を含む平面」と交差している
-                dispSquareFlag = true;
-                //平面と線分が交差している点の座標ip
-                float m = Abs(d1);
-                float n = Abs(d2);
-                ip = (sp * n + ep * m) / (m + n);//内分点の座標ip
-                //ipが三角形に含まれているか
-                bool containFlag = true;//とりあえず含まれていることにする
-                for (int i = 0; i < 3; i++) {
-                    VECTOR side = p[(i + 1) % 3] - p[i];//三角形の一辺のベクトル
-                    VECTOR p_ip = ip - p[i];//三角形の１つの頂点から交差点までのベクトル
-                    VECTOR c = cross(side, p_ip);
-                    float d = dot(nv, c);
-                    if (d < 0) {//外積ベクトルが法線ベクトルと逆方向になっている
-                        containFlag = false;//ipが三角形に含まれていない
-                    }
-                    //外積ベクトル表示
-                    if (dispCrossFlag) {
-                        float thickness = 1.2f;
-                        segment(p[i], p[i] + c, crossColor[i], thickness);//外積ベクトル表示
-                        segment(p[i], p[(i+1)%3], crossColor[i], thickness);//辺ベクトル表示
-                        segment(p[i], ip, crossColor[i], thickness);//交点までのベクトル
-                    }
+            bool containFlag = true;//とりあえず含まれていることにする
+            for (int i = 0; i < 3; i++) {
+                VECTOR side = p[(i + 1) % 3] - p[i];//三角形の一辺のベクトル
+                VECTOR p_sp = sp - p[i];//三角形の１つの頂点から交差点までのベクトル
+                VECTOR c = cross(side, p_sp);
+                float d = dot(nv, c);
+                if (d < 0) {//外積ベクトルが法線ベクトルと逆方向になっている
+                    containFlag = false;//ipが三角形に含まれていない
                 }
-                if (containFlag) {//三角形と交差している
-                    triColor = red;
+                //外積ベクトル表示
+                if (dispCrossFlag) {
+                    float thickness = 1.2f;
+                    segment(p[i], p[i] + c, crossColor[i], thickness);//外積ベクトル表示
+                    segment(p[i], p[(i + 1) % 3], crossColor[i], thickness);//辺ベクトル表示
+                    segment(p[i], sp, crossColor[i], thickness);//交点までのベクトル
                 }
+            }
+            if (containFlag) {
+                triColor = red;
             }
         }
         //描画----------------------------------------------------------------
@@ -174,11 +163,10 @@ void gmain() {
             if (dispAxisFlag) { 
                 axis(white, 0.4f);
             }
-
-            segment(sp, ep, white, 1.5f);
+            segment(sp, sp+(-nv*distance), white, 1.5f);
+            point(sp, white);
             
             if (dispSquareFlag) { 
-                point(ip, white);
                 squareWithHole(triTran, triRot, gray);
             }
             
