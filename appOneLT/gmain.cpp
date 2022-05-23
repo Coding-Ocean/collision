@@ -1,3 +1,4 @@
+//テスト中
 #include"libOne.h"
 #include"view_proj.h"
 #include"segment.h"
@@ -34,34 +35,39 @@ void gmain() {
 
     //-----------------------------------------------------------------------
     //線分のオリジナルポジションosp,oep
-    VECTOR osp(0,  0, 0);//original start point
-    VECTOR oep(0, -0.7f, 0);//original end point
+    //VECTOR osp(0,  0, 0);//original start point
     //線分の座標変換後のポジションsp,ep
-    VECTOR sp;//start point
-    VECTOR ep;//end point
+    //VECTOR sp;//start point
     VECTOR segTran(0.5f,0.3f,0.0f);//セグメントの移動用 segment translate
     VECTOR segRot;//セグメントの回転用 segment rotate
 
     //-----------------------------------------------------------------------
     //三角形頂点のオリジナルポジションop[3]と法線ベクトルonv
-    VECTOR op[3];
+    VECTOR op[2][3];
+    VECTOR onv[2];
     //反時計回りに頂点を用意する
-    angleMode(DEGREES);
-    op[0].set(Sin(   0)*0.5f, 0.0f, -Cos(   0)*0.5f);
-    op[1].set(Sin(-120)*0.5f, 0.0f, -Cos(-120)*0.5f);
-    op[2].set(Sin(-240)*0.5f, 0.0f, -Cos(-240)*0.5f);
-    angleMode(RADIANS);
-    VECTOR onv = cross(op[1] - op[0], op[2] - op[0]);
-    onv.normalize();
+    float y = -0.1f;
+    op[0][0].set(0,y,-1);
+    op[0][1].set(-1,0,0);
+    op[0][2].set(0,y,1);
+    onv[0] = cross(op[0][1] - op[0][0], op[0][2] - op[0][0]);
+    onv[0].normalize();
+
+    op[1][0].set(0, y, 1);
+    op[1][1].set(1, 0, 0);
+    op[1][2].set(0, y, -1);
+    onv[1] = cross(op[1][1] - op[1][0], op[1][2] - op[1][0]);
+    onv[1].normalize();
+
     //三角形頂点の座標変換後のポジションp[3]と法線ベクトルnv
-    VECTOR p[3];
-    VECTOR nv;
+    VECTOR p[2][3];
+    VECTOR nv[2];
     VECTOR triTran;//三角形の移動用 triangle translate
     VECTOR triRot;//三角形の回転用 triangle rotate
     //-----------------------------------------------------------------------
     //線分と三角形を座標変換するための共用データ
     MATRIX world;
-    float speed = 0.003f;
+    float speed = 0.005f;
     //-----------------------------------------------------------------------
     //点から三角ポリゴンを含む無限平面までの距離
     float distance = 0;
@@ -76,12 +82,12 @@ void gmain() {
     COLOR yellow(255, 255, 60);
     COLOR cyan(0, 255, 255);
     COLOR blue(255, 0, 255);
-    COLOR triColor;//三角形の色
+    COLOR triColor[2];//三角形の色
     COLOR crossColor[3]  { yellow,green,cyan };
 
     //表示フラッグ
     bool dispAxisFlag = false;
-    bool dispSquareFlag = true;
+    bool dispSquareFlag = false;
     bool dispCrossFlag = false;
     //移動回転させるオブジェクトの選択
     int operateObjSw = 0;
@@ -110,11 +116,10 @@ void gmain() {
             if (operateObjSw == 0) {
                 input(segTran, segRot, speed);
             }
-            world.identity();
-            world.mulTranslate(segTran);
-            world.mulRotateYXZ(segRot);
-            sp = world * osp;
-            ep = world * oep;
+            //world.identity();
+            //world.mulTranslate(segTran);
+            //world.mulRotateYXZ(segRot);
+            //sp = world * osp;
         }
         //三角形の頂点を動かす--------------------------------------------------
         {
@@ -124,38 +129,59 @@ void gmain() {
             world.identity();
             world.mulTranslate(triTran);
             world.mulRotateYXZ(triRot);
-            for (int i = 0; i < 3; i++) {
-                p[i] = world * op[i];
+            for (int j = 0; j < 2; j++) {
+                for (int i = 0; i < 3; i++) {
+                    p[j][i] = world * op[j][i];
+                }
             }
             //三角形の法線を回転させる
             world.identity();
             world.mulRotateYXZ(triRot);
-            nv = world * onv;
+            for (int j = 0; j < 2; j++) {
+                nv[j] = world * onv[j];
+            }
         }
         //当たり判定----------------------------------------------------------
         {
-            distance = dot(nv, sp - p[0]);
-
-            triColor = grayLight;//交差していないとき橙
-            bool containFlag = true;//とりあえず含まれていることにする
-            for (int i = 0; i < 3; i++) {
-                VECTOR side = p[(i + 1) % 3] - p[i];//三角形の一辺のベクトル
-                VECTOR p_sp = sp - p[i];//三角形の１つの頂点から交差点までのベクトル
-                VECTOR c = cross(side, p_sp);
-                float d = dot(nv, c);
-                if (d < 0) {//外積ベクトルが法線ベクトルと逆方向になっている
-                    containFlag = false;//ipが三角形に含まれていない
+            bool flag = false;
+            for (int j = 0; j < 2; j++) {
+                distance = dot(nv[j], segTran - p[j][0]);
+                triColor[j] = grayLight;//当たっていないときグレイ
+                bool containFlag = true;//とりあえず含まれていることにする
+                for (int i = 0; i < 3; i++) {
+                    VECTOR side = p[j][(i + 1) % 3] - p[j][i];//三角形の一辺のベクトル
+                    VECTOR p_segTran = segTran - p[j][i];//三角形の１つの頂点から交差点までのベクトル
+                    VECTOR c = cross(side, p_segTran);
+                    float d = dot(nv[j], c);
+                    if (d < 0) {//外積ベクトルが法線ベクトルと逆方向になっている
+                        containFlag = false;//ipが三角形に含まれていない
+                    }
+                    //外積ベクトル表示
+                    //if (dispCrossFlag) {
+                    //    float thickness = 1.2f;
+                    //    segment(p[i], p[i] + c, crossColor[i], thickness);//外積ベクトル表示
+                    //    segment(p[i], p[(i + 1) % 3], crossColor[i], thickness);//辺ベクトル表示
+                    //    segment(p[i], segTran, crossColor[i], thickness);//交点までのベクトル
+                    //}
                 }
-                //外積ベクトル表示
-                if (dispCrossFlag) {
-                    float thickness = 1.2f;
-                    segment(p[i], p[i] + c, crossColor[i], thickness);//外積ベクトル表示
-                    segment(p[i], p[(i + 1) % 3], crossColor[i], thickness);//辺ベクトル表示
-                    segment(p[i], sp, crossColor[i], thickness);//交点までのベクトル
+                if (containFlag) {
+                    flag = true;
+                    triColor[j] = red;
+                    segTran = segTran + nv[j] * (0.1f - distance);
                 }
             }
-            if (containFlag) {
-                triColor = red;
+            if (flag == false) {
+                VECTOR v1 = p[0][2] - p[0][0];
+                v1.normalize();
+                VECTOR v2 = segTran - p[0][0];
+                VECTOR v3 = cross(v1, v2);
+                float dist = v3.mag();
+                if (dist < 0.1f) {
+                    v3.normalize();
+                    VECTOR v4 = cross(v3, v1);
+                    segTran = segTran + v4 * (0.1f - dist);
+                }
+                text(dist, 900, 100);
             }
         }
         //描画----------------------------------------------------------------
@@ -163,14 +189,15 @@ void gmain() {
             if (dispAxisFlag) { 
                 axis(white, 0.4f);
             }
-            segment(sp, sp+(-nv*distance), white, 1.5f);
-            point(sp, white);
+            //segment(segTran, segTran+(-nv*distance), white, 1.5f);
+            point(segTran, white);
             
             if (dispSquareFlag) { 
                 squareWithHole(triTran, triRot, gray);
             }
             
-            triangle(p, triColor);
+            triangle(p[0], triColor[0]);
+            triangle(p[1], triColor[1]);
 
             //text info
             float size = 30;
@@ -194,7 +221,7 @@ void gmain() {
             text("軸表示 : X", colL, ++num * rowH);
             text("外積表示 : C", colL, ++num * rowH);
             textSize(20);
-            text((let)"三角形の法線:" + nv.x + " " + nv.y + " " + nv.z, colL, ++num * rowH);
+            //text((let)"三角形の法線:" + nv.x + " " + nv.y + " " + nv.z, colL, ++num * rowH);
         }
     }
 }

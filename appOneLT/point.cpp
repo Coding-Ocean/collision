@@ -3,7 +3,7 @@
 #include"VECTOR.h"
 #include"mathUtil.h"
 
-float rs = 0.009f;
+float rs = 0.1f;
 VECTOR opp[] = {
     VECTOR(Cos(0) * rs,Sin(0) * rs,0),
     VECTOR(Cos(45 * TO_RAD) * rs,Sin(45 * TO_RAD) * rs,0),
