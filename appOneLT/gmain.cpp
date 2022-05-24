@@ -4,7 +4,7 @@
 #include"triangle.h"
 #include"axis.h"
 #include"squareWithHole.h"
-#include"point.h"
+#include"sphere.h"
 
 void input(VECTOR& tran, VECTOR& rot, float speed)
 {
@@ -80,7 +80,7 @@ void gmain() {
     int operateObjSw = 0;
     //プロジェクション行列を作っておく
     createProj();
-
+    createSphere();
     //メインループ-------------------------------------------------------------
     while (notQuit) {
         clear(60);
@@ -123,8 +123,10 @@ void gmain() {
             world.mulRotateYXZ(triRot);
             n = world * on;
         }
-        //平面の式を求めp.xとp.zからp.yを求める-----------------------------------
+        //平面の式を求め「p.xとp.z」から「p.y」を求める-----------------------------------
         // 平面の式 ax+by+cz+d=0;
+        // ベクトル(a,b,c)は面の法線。dは面から原点までの最短距離。
+        // 未定のdを求める
         // d=-ax-by-bz
         float d = -n.x * tp[0].x - n.y * tp[0].y - n.z * tp[0].z;
         // y=(-ax-cz-d)/b
@@ -132,39 +134,36 @@ void gmain() {
         //描画----------------------------------------------------------------
         {
             if (dispAxisFlag) {
+                //軸
                 axis(white, 0.4f);
+                //法線
                 segment(VECTOR(0, 0, 0), n, white);
-                segment(VECTOR(0, 0, 0), n * -d, green);
+                //原点から平面までの最短距離
+                segment(VECTOR(0, 0, 0), n * -d, yellow);
             }
+            //平面
             triangle(tp, grayLight);
             squareWithHole(triTran, triRot, gray);
-
-            point(p+VECTOR(0,0.015f,0), cyan);
-
-
-            //text info
+            //ポイント
+            sphere(p, cyan);
+            //テキスト情報
             float size = 30;
             textSize(size);
             float colL = 10;//列の始まり
             float rowH = size + 10;//行の高さ
             int num = 0;//行番号
-
             if (operateObjSw == 0)
                 text(" 点 の", colL, ++num * rowH);
             else
                 text("三角の", colL, ++num * rowH);
-
             if (isPress(KEY_SHIFT))
                 text("回転 : shift+ADWSQE", colL + size * 3, num * rowH);
             else
                 text("移動 : ADWSQE", colL + size * 3, num * rowH);
-
             text("操作対象切換 : Z", colL, ++num * rowH);
             text("位置回転リセット : R", colL, ++num * rowH);
             text("軸表示 : X", colL, ++num * rowH);
             text((let)"原点から平面までの最短距離:"+d, colL, ++num * rowH);
-            textSize(20);
-            text((let)"三角形の法線:" + n.x + " " + n.y + " " + n.z, colL, ++num * rowH);
         }
     }
 }

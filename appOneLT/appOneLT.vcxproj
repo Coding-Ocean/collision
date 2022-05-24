@@ -153,6 +153,7 @@
     <ClCompile Include="gmain.cpp" />
     <ClCompile Include="point.cpp" />
     <ClCompile Include="segment.cpp" />
+    <ClCompile Include="sphere.cpp" />
     <ClCompile Include="squareWithHole.cpp" />
     <ClCompile Include="triangle.cpp" />
     <ClCompile Include="view_proj.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="axis.h" />
     <ClInclude Include="point.h" />
     <ClInclude Include="segment.h" />
+    <ClInclude Include="sphere.h" />
     <ClInclude Include="squareWithHole.h" />
     <ClInclude Include="triangle.h" />
     <ClInclude Include="view_proj.h" />
