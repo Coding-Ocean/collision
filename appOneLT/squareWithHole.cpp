@@ -5,8 +5,9 @@
 #include"graphic.h"
 #include"VECTOR.h"
 
-float l = 1;
-VECTOR osqp[11] = {
+static const int num = 11;
+static float l = 1;
+static VECTOR op[num] = {
     VECTOR(0,0,-0.5f),
     VECTOR(-0.433f,0,0.25f),
     VECTOR(0.433f,0,0.25f),
@@ -19,17 +20,15 @@ VECTOR osqp[11] = {
     VECTOR(l, 0, -l),
     VECTOR(0, 0, -l),
 };
+static VECTOR p[num];
 
 void squareWithHole(VECTOR& t, VECTOR& r, const COLOR& c)
 {
-    
     gWorld.identity();
-    gWorld.mulTranslate(t);
     gWorld.mulRotateYXZ(r);
-    //ÇªÇµÇƒç¿ïWïœä∑
-    VECTOR p[11];
+    gWorld.mulTranslate(t);
     for (int i = 0; i < 11; i++) {
-        p[i] = gWorld * osqp[i];
+        p[i] = gWorld * op[i];
         p[i] = gView * p[i];
         p[i] = gProj * p[i];
     }

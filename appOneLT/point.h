@@ -1,2 +1,3 @@
 #pragma once
-void point(const class VECTOR& t, const struct COLOR& c);
+void createPoint();
+void point(const class VECTOR& t, const struct COLOR& c, float diameter);

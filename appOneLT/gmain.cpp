@@ -4,7 +4,7 @@
 #include"triangle.h"
 #include"axis.h"
 #include"squareWithHole.h"
-#include"sphere.h"
+#include"point.h"
 #include"segment.h"
 
 void input(VECTOR& tran, VECTOR& rot, float speed)
@@ -32,6 +32,8 @@ void input(VECTOR& tran, VECTOR& rot, float speed)
 void gmain() {
     window(1920, 1080, full);
     hideCursor();
+    createSegment();
+    createPoint();
 
     //-----------------------------------------------------------------------
     //点のオリジナルポジションop
@@ -55,7 +57,10 @@ void gmain() {
     VECTOR tp[3];
     VECTOR n;
     VECTOR triTran;//三角形の移動用 triangle translate
-    VECTOR triRot;//三角形の回転用 triangle rotate
+    VECTOR triRot(0,0,0.4f);//三角形の回転用 triangle rotate
+    //-----------------------------------------------------------------------
+    //原点から平面までの最短距離
+    float d = 0;
     //-----------------------------------------------------------------------
     //点と三角形を座標変換するための共用データ
     float speed = 0.003f;
@@ -71,17 +76,12 @@ void gmain() {
     COLOR yellow(255, 255, 60);
     COLOR cyan(0, 255, 255);
     COLOR blue(255, 0, 255);
-    COLOR triColor;//三角形の色
-    COLOR crossColor[3]{ yellow,green,cyan };
-
     //表示フラッグ
     bool dispAxisFlag = false;
     //移動回転させるオブジェクトの選択
     int operateObjSw = 0;
     //プロジェクション行列を作っておく
     createProj();
-    createSphere();
-    createSegment();
     //メインループ-------------------------------------------------------------
     while (notQuit) {
         clear(60);
@@ -95,7 +95,7 @@ void gmain() {
                 pTran.set(0, 0, 0);
                 pRot.set(0, 0, 0);
                 triTran.set(0, 0, 0);
-                triRot.set(0, 0, 0);
+                triRot.set(0, 0, 0.2f);
             }
         }
         //点を動かす---------------------------------------------------------
@@ -113,9 +113,10 @@ void gmain() {
             if (operateObjSw == 1) {
                 input(triTran, triRot, speed);
             }
+            //今回は移動してからの回転
             gWorld.identity();
-            gWorld.mulTranslate(triTran);
             gWorld.mulRotateYXZ(triRot);
+            gWorld.mulTranslate(triTran);
             for (int i = 0; i < 3; i++) {
                 tp[i] = gWorld * otp[i];
             }
@@ -124,14 +125,16 @@ void gmain() {
             gWorld.mulRotateYXZ(triRot);
             n = gWorld * on;
         }
-        //平面の式を求め「p.xとp.z」から「p.y」を求める-----------------------------------
-        // 平面の式 ax+by+cz+d=0;
-        // ベクトル(a,b,c)は面の法線。dは面から原点までの最短距離。
-        // 未定のdを求める
-        // d=-ax-by-bz
-        float d = -n.x * tp[0].x - n.y * tp[0].y - n.z * tp[0].z;
-        // y=(-ax-cz-d)/b
-        p.y = (-n.x * p.x - n.z * p.z - d) / n.y;
+        //平面の式を求め「p.xとp.z」から「p.y」を求める----------------------------
+        {
+            // 平面の式 ax+by+cz+d=0;
+            // ベクトル(a,b,c)は面の法線。dは原点から平面までの最短距離。
+            // 未定のdを求める
+            // d=-ax-by-cz
+            d = -n.x * tp[0].x - n.y * tp[0].y - n.z * tp[0].z;
+            // y=(-ax-cz-d)/b
+            p.y = (-n.x * p.x - n.z * p.z - d) / n.y;
+        }
         //描画----------------------------------------------------------------
         {
             if (dispAxisFlag) {
@@ -146,8 +149,8 @@ void gmain() {
             triangle(tp, grayLight);
             squareWithHole(triTran, triRot, gray);
             //ポイント
-            segment(p, p+VECTOR(0,0.1f,0),cyan,3);
-            sphere(p+VECTOR(0,0.1f,0), pink,10);
+            segment(p, p+VECTOR(0,0.1f,0),cyan,9);
+            point(p+VECTOR(0,0.1f,0), pink,20);
             //テキスト情報
             float size = 30;
             textSize(size);
