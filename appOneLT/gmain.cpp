@@ -34,6 +34,9 @@ void input(VECTOR& tran,VECTOR& rot,float speed)
 void gmain() {
     window(1920, 1080, full);
     hideCursor();
+    createPoint();
+    createSegment();
+    createCircle();
 
     //-----------------------------------------------------------------------
     //ベクトルa
@@ -65,11 +68,9 @@ void gmain() {
     bool dispAxisFlag = true;
     bool dispCircleFlag = false;
     //移動回転させるオブジェクトの選択
-    int operateObjSw = 0;
+    int operateObjSw = 1;
     //プロジェクション行列を作っておく
     createProj();
-    //円を作っておく
-    createCircle();
     //メインループ-------------------------------------------------------------
     while (notQuit) {
         clear(0);
@@ -117,16 +118,17 @@ void gmain() {
         //外積ベクトルを求める--------------------------------------------------
         VECTOR c = cross(a, b);
         //描画----------------------------------------------------------------
-        if (dispAxisFlag) axis(white, 0.6f);
-        float thickness = 2.2f;
+        if (dispAxisFlag) axis(white, 2);
+        float thickness = 8.0f;
+        float diameter = 20;
         VECTOR o(0, 0, 0);
         segment(o, a, yellow, thickness);//ベクトルa表示
-        if(!dispAxisFlag)segment(o, -a, yellow, thickness/3);//ベクトルa表示
-        point(a, yellow);
+        if(!dispAxisFlag)segment(o, -a, yellow, thickness/4);//ベクトルa表示
+        point(a, yellow, diameter);
         segment(o, b, cyan, thickness);//ベクトルb表示
-        point(b, cyan);
+        point(b, cyan, diameter);
         segment(o, c, red, thickness);//外積ベクトルc
-        point(c, red);
+        point(c, red, diameter);
         if (dispCircleFlag) {
             circleQt(c, gray);//外積方向を向いた円の描画
         }
