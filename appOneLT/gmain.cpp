@@ -32,6 +32,7 @@ void gmain() {
     window(1920, 1080, full);
     hideCursor();
     createSegment();
+    createPoint();
     //-----------------------------------------------------------------------
     //線分のオリジナルポジションosp,oep
     VECTOR osp(0,  0.2f, 0);//original start point
@@ -178,7 +179,7 @@ void gmain() {
             segment(sp, ep, white, 6);
             
             if (dispSquareFlag) { 
-                point(ip, white);
+                point(ip, white, 20);
                 squareWithHole(triTran, triRot, gray);
             }
             
