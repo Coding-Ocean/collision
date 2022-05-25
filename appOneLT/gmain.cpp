@@ -5,6 +5,7 @@
 #include"axis.h"
 #include"squareWithHole.h"
 #include"sphere.h"
+#include"segment.h"
 
 void input(VECTOR& tran, VECTOR& rot, float speed)
 {
@@ -57,7 +58,6 @@ void gmain() {
     VECTOR triRot;//三角形の回転用 triangle rotate
     //-----------------------------------------------------------------------
     //点と三角形を座標変換するための共用データ
-    MATRIX world;
     float speed = 0.003f;
 
     //その他------------------------------------------------------------------
@@ -67,7 +67,7 @@ void gmain() {
     COLOR grayLight(140, 140, 140);
     COLOR gray(128, 128, 128);
     COLOR white(255, 255, 255);
-    COLOR green(255, 255, 0);
+    COLOR green(0, 255, 0);
     COLOR yellow(255, 255, 60);
     COLOR cyan(0, 255, 255);
     COLOR blue(255, 0, 255);
@@ -81,6 +81,7 @@ void gmain() {
     //プロジェクション行列を作っておく
     createProj();
     createSphere();
+    createSegment();
     //メインループ-------------------------------------------------------------
     while (notQuit) {
         clear(60);
@@ -102,26 +103,26 @@ void gmain() {
             if (operateObjSw == 0) {
                 input(pTran, pRot, speed);
             }
-            world.identity();
-            world.mulTranslate(pTran);
-            world.mulRotateYXZ(pRot);
-            p = world * op;
+            gWorld.identity();
+            gWorld.mulTranslate(pTran);
+            gWorld.mulRotateYXZ(pRot);
+            p = gWorld * op;
         }
         //三角形の頂点を動かす--------------------------------------------------
         {
             if (operateObjSw == 1) {
                 input(triTran, triRot, speed);
             }
-            world.identity();
-            world.mulTranslate(triTran);
-            world.mulRotateYXZ(triRot);
+            gWorld.identity();
+            gWorld.mulTranslate(triTran);
+            gWorld.mulRotateYXZ(triRot);
             for (int i = 0; i < 3; i++) {
-                tp[i] = world * otp[i];
+                tp[i] = gWorld * otp[i];
             }
             //三角形の法線を回転させる
-            world.identity();
-            world.mulRotateYXZ(triRot);
-            n = world * on;
+            gWorld.identity();
+            gWorld.mulRotateYXZ(triRot);
+            n = gWorld * on;
         }
         //平面の式を求め「p.xとp.z」から「p.y」を求める-----------------------------------
         // 平面の式 ax+by+cz+d=0;
@@ -139,13 +140,14 @@ void gmain() {
                 //法線
                 segment(VECTOR(0, 0, 0), n, white);
                 //原点から平面までの最短距離
-                segment(VECTOR(0, 0, 0), n * -d, yellow);
+                segment(VECTOR(0, 0, 0), n * -d, yellow, 2);
             }
             //平面
             triangle(tp, grayLight);
             squareWithHole(triTran, triRot, gray);
             //ポイント
-            sphere(p, cyan);
+            segment(p, p+VECTOR(0,0.1f,0),cyan,3);
+            sphere(p+VECTOR(0,0.1f,0), pink,10);
             //テキスト情報
             float size = 30;
             textSize(size);

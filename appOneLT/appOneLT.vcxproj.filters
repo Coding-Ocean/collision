@@ -16,6 +16,7 @@
     <ClCompile Include="squareWithHole.cpp" />
     <ClCompile Include="point.cpp" />
     <ClCompile Include="sphere.cpp" />
+    <ClCompile Include="cylinder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">
@@ -36,5 +37,6 @@
     <ClInclude Include="squareWithHole.h" />
     <ClInclude Include="point.h" />
     <ClInclude Include="sphere.h" />
+    <ClInclude Include="cylinder.h" />
   </ItemGroup>
 </Project>

@@ -17,13 +17,13 @@ VECTOR opp[] = {
 
 void point(const VECTOR& t, const COLOR& c)
 {
-    MATRIX world;
-    world.identity();
-    world.mulTranslate(t);
+    
+    gWorld.identity();
+    gWorld.mulTranslate(t);
     //ÇªÇµÇƒç¿ïWïœä∑
     VECTOR p[8];
     for (int i = 0; i < 8; i++) {
-        p[i] = world * opp[i];
+        p[i] = gWorld * opp[i];
         p[i] = gView * p[i];
         p[i] = gProj * p[i];
     }

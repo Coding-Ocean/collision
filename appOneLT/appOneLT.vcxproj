@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="axis.cpp" />
+    <ClCompile Include="cylinder.cpp" />
     <ClCompile Include="gmain.cpp" />
     <ClCompile Include="point.cpp" />
     <ClCompile Include="segment.cpp" />
@@ -167,6 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="axis.h" />
+    <ClInclude Include="cylinder.h" />
     <ClInclude Include="point.h" />
     <ClInclude Include="segment.h" />
     <ClInclude Include="sphere.h" />

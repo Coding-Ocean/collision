@@ -4,14 +4,16 @@
 #include"mathUtil.h"
 #include"VECTOR.h"
 //行列
-extern MATRIX gView={0}, gProj={0};
+extern MATRIX gWorld = { 0 }, gView = { 0 }, gProj = { 0 };
 //カメラの位置決め用変数
-float angleY = 0 * TO_RAD;
-float angleX = 5 * TO_RAD;
+float oAngleY = 0 * TO_RAD;
+float oAngleX = 5 * TO_RAD;
+float angleY = oAngleY;
+float angleX = oAngleX;
 float radius = 2;
 int swCam = 0;
 VECTOR camPos, lookat(0, 0, 0), up(0, 1, 0);
-float speed = 0.003f;
+float speed = 0.006f;
 
 void createProj()
 {
@@ -24,9 +26,15 @@ void updateView()
     if (isTrigger(KEY_SPACE)) {
         ++swCam %= 4;
         if (swCam == 0) {
-            angleY = 0 * TO_RAD;
-            angleX = 5 * TO_RAD;
+            angleY = oAngleY;
+            angleX = oAngleX;
         }
+    }
+
+    if (isTrigger(KEY_P)) {
+        swCam = 0;
+        angleY = oAngleY;
+        angleX = oAngleX;
     }
 
     if (swCam == 0) {

@@ -22,14 +22,14 @@ VECTOR osqp[11] = {
 
 void squareWithHole(VECTOR& t, VECTOR& r, const COLOR& c)
 {
-    MATRIX world;
-    world.identity();
-    world.mulTranslate(t);
-    world.mulRotateYXZ(r);
+    
+    gWorld.identity();
+    gWorld.mulTranslate(t);
+    gWorld.mulRotateYXZ(r);
     //ÇªÇµÇƒç¿ïWïœä∑
     VECTOR p[11];
     for (int i = 0; i < 11; i++) {
-        p[i] = world * osqp[i];
+        p[i] = gWorld * osqp[i];
         p[i] = gView * p[i];
         p[i] = gProj * p[i];
     }

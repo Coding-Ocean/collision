@@ -2,40 +2,42 @@
 #include"graphic.h"
 #include"VECTOR.h"
 #include"mathUtil.h"
-
-static const int n = 8;//Šp”
-static const int na = n * (n / 2 + 1);//’¸“_”
-static float rs = 0.01f;
-static VECTOR op[na];
+static const int numAng = 16;//Šp”B‹ô”‚Å‚ ‚é‚±‚ÆB
+static const int numVtx = numAng * (numAng / 2 + 1);//‘S’¸“_”
+static float radius = 0.0005f;
+static VECTOR op[numVtx];
 void createSphere()
 {
-	float angle = 3.1415926f / (n / 2);
-	for (int j = 0; j < n/2+1; j++) {
-		float y = Cos(angle * j)*rs;
-		float r = Sin(angle * j)*rs;
-		for (int i = 0; i < n; i++) {
-			op[n * j + i].set(Cos(angle*i) * r, y, Sin(angle*i) * r);
-		}
-	}
+    //ã‚©‚ç‰º‚É‰~‚ğ”¼Œar‚ğ•Ï‚¦‚È‚ª‚çnumAng/2+1‚Ì”‚¾‚¯—pˆÓ‚·‚é
+    float angle = 3.1415926f / (numAng / 2);
+    for (int j = 0; j < numAng / 2 + 1; j++) {
+        float y = Cos(angle * j) * radius;
+        float r = Sin(angle * j) * radius;
+        //‰~‚ÌÀ•W
+        for (int i = 0; i < numAng; i++) {
+            op[numAng * j + i].set(Cos(angle * i) * r, y, Sin(angle * i) * r);
+        }
+    }
 }
-void sphere(const VECTOR& t, const COLOR& col)
+void sphere(const VECTOR& t, const COLOR& col,float d)
 {
-    MATRIX world;
-    world.identity();
-    world.mulTranslate(t);
+    gWorld.identity();
+    gWorld.mulTranslate(t);
+    gWorld.mulScaling(d, d, d);
     //‚»‚µ‚ÄÀ•W•ÏŠ·
-    VECTOR p[na];
-    for (int i = 0; i < na; i++) {
-        p[i] = world * op[i];
+    VECTOR p[numVtx];
+    for (int i = 0; i < numVtx; i++) {
+        p[i] = gWorld * op[i];
         p[i] = gView * p[i];
         p[i] = gProj * p[i];
     }
     //•`‰æ
-    for (int i = 0; i < na-n; i++) {
+    for (int i = 0; i < numVtx-numAng; i++) {
+        //lŠpŒ`
         int a = i;
-        int b = i + n;
-        int c = (i + 1) % n == 0 ? i + 1 - n : i + 1;
-        int d = (b + 1) % n == 0 ? b + 1 - n : b + 1;
+        int b = i + numAng;
+        int c = (i + 1) % numAng == 0 ? i + 1 - numAng : i + 1;
+        int d = (b + 1) % numAng == 0 ? b + 1 - numAng : b + 1;
         triangle3D(p[a], p[b], p[c], col, col, col);
         triangle3D(p[c], p[b], p[d], col, col, col);
     }
