@@ -119,10 +119,10 @@ void gmain()
 		float size = 50;
 		float rowH = size + 10;
 		float colL = 10;
-		int num=0;
+		int num = 0;
 		textSize(size);
-		if(operateObjSw==0)	
-			text((let)"’¼ü‚Ì", colL, ++num*rowH);
+		if (operateObjSw == 0)
+			text((let)"’¼ü‚Ì", colL, ++num * rowH);
 		else
 			text((let)" “_ ‚Ì", colL, ++num * rowH);
 		if (isPress(KEY_SHIFT))
@@ -130,6 +130,6 @@ void gmain()
 		else
 			text((let)"ˆÚ“® : ADWS", colL + size * 3, num * rowH);
 		text((let)"‘€ì‘ÎÛØŠ· : Z", colL, ++num * rowH);
-		text((let)"Œ´“_‚Ü‚Å‚ÌÅ’Z‹——£:" + c, colL, ++num*rowH);
+		text((let)"Œ´“_‚Ü‚Å‚ÌÅ’Z‹——£:" + c, colL, ++num * rowH);
 	}
 }
