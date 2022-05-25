@@ -36,3 +36,4 @@ float Pow(float a, float b);
 float Abs(float a);
 float Round(float v);
 float Map(float v, float a1, float a2, float b1, float b2);
+float lerp(float a, float b, float f);
