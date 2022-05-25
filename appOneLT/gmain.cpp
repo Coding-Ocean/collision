@@ -53,6 +53,7 @@ void gmain()
 	//色
 	COLOR white(210, 210, 210);
 	COLOR pink(255, 128, 128);
+	COLOR cyan(0, 255, 255);
 	COLOR green(0, 255, 0);
 	COLOR yellow(255, 255, 0);
 	COLOR lineColor;
@@ -99,13 +100,15 @@ void gmain()
 
 		//描画------------------------------------------------------------
 		//直線
-		mathSegment(sp, ep, lineColor, 10);
+		mathSegment(sp, ep, lineColor, 6);
 		//垂線ベクトル
 		mathSegment(VECTOR(0, 0), n, lineColor, 1);
 		//cの見える化
 		mathSegment(VECTOR(0, 0), n * -c, yellow, 6);
 		//点ｐ
-		mathPoint(p, pink, 20);
+		VECTOR head = p + VECTOR(0, 0.2f);
+		mathSegment(p, head, cyan, 10);
+		mathPoint(head, pink, 20);
 
 		//ｃを求める式は逆垂線ベクトルとsｐとの内積と同じ
 		//mathSegment(VECTOR(0, 0), -n*dot(-n,sp), red, 3);
