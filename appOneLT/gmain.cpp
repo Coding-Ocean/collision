@@ -31,7 +31,7 @@ void input(VECTOR& tran,VECTOR& rot,float speed)
 void gmain() {
     window(1920, 1080, full);
     hideCursor();
-
+    createSegment();
     //-----------------------------------------------------------------------
     //線分のオリジナルポジションosp,oep
     VECTOR osp(0,  0.2f, 0);//original start point
@@ -158,7 +158,7 @@ void gmain() {
                     }
                     //外積ベクトル表示
                     if (dispCrossFlag) {
-                        float thickness = 1.2f;
+                        float thickness = 6.0f;
                         segment(p[i], p[i] + c, crossColor[i], thickness);//外積ベクトル表示
                         segment(p[i], p[(i+1)%3], crossColor[i], thickness);//辺ベクトル表示
                         segment(p[i], ip, crossColor[i], thickness);//交点までのベクトル
@@ -175,7 +175,7 @@ void gmain() {
                 axis(white, 0.4f);
             }
 
-            segment(sp, ep, white, 1.5f);
+            segment(sp, ep, white, 6);
             
             if (dispSquareFlag) { 
                 point(ip, white);
