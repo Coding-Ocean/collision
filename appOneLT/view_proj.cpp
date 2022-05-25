@@ -4,7 +4,7 @@
 #include"mathUtil.h"
 #include"VECTOR.h"
 //行列
-extern MATRIX gView={0}, gProj={0};
+extern MATRIX gWorld = { 0 }, gView = { 0 }, gProj = { 0 };
 //カメラの位置決め用変数
 float angleY = 0 * TO_RAD;
 float angleX = 10 * TO_RAD;

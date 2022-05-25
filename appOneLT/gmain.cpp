@@ -31,6 +31,8 @@ void input(VECTOR& tran,VECTOR& rot,float speed)
 void gmain() {
     window(1920, 1080, full);
     hideCursor();
+    createSegment();
+    createPoint();
 
     //-----------------------------------------------------------------------
     //線分のオリジナルポジション始点osp、終点oep
@@ -64,7 +66,6 @@ void gmain() {
 
     //-----------------------------------------------------------------------
     //線分と三角形を座標変換するための共用データ
-    MATRIX world;
     float speed = 0.006f;
 
     //その他------------------------------------------------------------------
@@ -105,25 +106,25 @@ void gmain() {
         if (operateObjSw == 0) {
             input(segTran, segRot, speed);
         }
-        world.identity();
-        world.mulTranslate(segTran);
-        world.mulRotateYXZ(segRot);
-        sp = world * osp;
-        ep = world * oep;
+        gWorld.identity();
+        gWorld.mulTranslate(segTran);
+        gWorld.mulRotateYXZ(segRot);
+        sp = gWorld * osp;
+        ep = gWorld * oep;
         //平面を動かす--------------------------------------------------
         if (operateObjSw == 1) {
             input(sqTran, sqRot, speed);
         }
-        world.identity();
-        world.mulTranslate(sqTran);
-        world.mulRotateYXZ(sqRot);
+        gWorld.identity();
+        gWorld.mulTranslate(sqTran);
+        gWorld.mulRotateYXZ(sqRot);
         for (int i = 0; i < 4; i++) {
-            p[i] = world * op[i];
+            p[i] = gWorld * op[i];
         }
         //法線を回転させる。移動してはだめ。
-        world.identity();
-        world.mulRotateYXZ(sqRot);
-        nv = world * onv;
+        gWorld.identity();
+        gWorld.mulRotateYXZ(sqRot);
+        nv = gWorld * onv;
         //衝突判定----------------------------------------------------------------
         //始点と終点が平面をはさんでいるか
         VECTOR v1 = sp - sqTran;
@@ -144,28 +145,28 @@ void gmain() {
             dispIpFlag = false;
         }
         //描画----------------------------------------------------------------
-        if (dispAxisFlag) axis(white, 0.4f);
-        segment(sp, ep, cyan, 1.5f);
-        point(sp, pink);
-        point(ep, green);
-        if(dispIpFlag)point(ip, white);
+        if (dispAxisFlag) axis(white, 1);
+        segment(sp, ep, cyan, 10);
+        point(sp, pink, 30);
+        point(ep, green, 30);
+        if(dispIpFlag)point(ip, white,30);
         square(p, squareColor);
         //説明用ベクトル描画
         VECTOR ofst(0, 0, 0);
         if (isTrigger(KEY_C))++dispSw %= 6;
         switch (dispSw) {
         case 5:
-            segment(ep, (sqTran + nv * d2), green);
-            segment(sqTran + ofst * 2, (sqTran + nv * d2) + ofst * 2, green, 2);
+            segment(ep, (sqTran + nv * d2), green, 2);
+            segment(sqTran + ofst * 2, (sqTran + nv * d2) + ofst * 2, green, 10);
         case 4:
-            segment(sp, (sqTran + nv * d1), pink, 0.5f);
-            segment(sqTran + ofst, (sqTran + nv * d1) + ofst, pink, 2);
+            segment(sp, (sqTran + nv * d1), pink, 2);
+            segment(sqTran + ofst, (sqTran + nv * d1) + ofst, pink, 10);
         case 3:
-            segment(sqTran, sqTran + nv, yellow);//法線
+            segment(sqTran, sqTran + nv, yellow, 4);//法線
         case 2:
-            segment(sqTran, ep, green, 2);//ｅｐへのベクトル
+            segment(sqTran, ep, green, 5);//ｅｐへのベクトル
         case 1:
-            segment(sqTran, sp, pink, 2);//ｓｐへのベクトル
+            segment(sqTran, sp, pink, 5);//ｓｐへのベクトル
         }
         //テキスト情報
         float size = 30;

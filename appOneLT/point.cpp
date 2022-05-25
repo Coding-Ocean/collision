@@ -2,33 +2,44 @@
 #include"graphic.h"
 #include"VECTOR.h"
 #include"mathUtil.h"
-
-float rs = 0.013f;
-VECTOR opp[] = {
-    VECTOR(Cos(0) * rs,Sin(0) * rs,0),
-    VECTOR(Cos(45 * TO_RAD) * rs,Sin(45 * TO_RAD) * rs,0),
-    VECTOR(Cos(90 * TO_RAD) * rs,Sin(90 * TO_RAD) * rs,0),
-    VECTOR(Cos(135 * TO_RAD) * rs,Sin(135 * TO_RAD) * rs,0),
-    VECTOR(Cos(180 * TO_RAD) * rs,Sin(180 * TO_RAD) * rs,0),
-    VECTOR(Cos(225 * TO_RAD) * rs,Sin(225 * TO_RAD) * rs,0),
-    VECTOR(Cos(270 * TO_RAD) * rs,Sin(270 * TO_RAD) * rs,0),
-    VECTOR(Cos(315 * TO_RAD) * rs,Sin(315 * TO_RAD) * rs,0),
-};
-
-void point(const VECTOR& t, const COLOR& c)
+#include"point.h"
+static const int numAng = 16;//角数。偶数であること。
+static const int numVtx = numAng * (numAng / 2 + 1);//全頂点数
+static float radius = 0.0005f;
+static VECTOR op[numVtx];
+void createPoint()
 {
-    MATRIX world;
-    world.identity();
-    world.mulTranslate(t);
+    //上から下に円を半径rを変えながらnumAng/2+1の数だけ用意する
+    float angle = 3.1415926f / (numAng / 2);
+    for (int j = 0; j < numAng / 2 + 1; j++) {
+        float y = Cos(angle * j) * radius;
+        float r = Sin(angle * j) * radius;
+        //円の座標
+        for (int i = 0; i < numAng; i++) {
+            op[numAng * j + i].set(Cos(angle * i) * r, y, Sin(angle * i) * r);
+        }
+    }
+}
+void point(const VECTOR& t, const COLOR& col, float d)
+{
+    gWorld.identity();
+    gWorld.mulTranslate(t);
+    gWorld.mulScaling(d, d, d);
     //そして座標変換
-    VECTOR p[8];
-    for (int i = 0; i < 8; i++) {
-        p[i] = world * opp[i];
+    VECTOR p[numVtx];
+    for (int i = 0; i < numVtx; i++) {
+        p[i] = gWorld * op[i];
         p[i] = gView * p[i];
         p[i] = gProj * p[i];
     }
     //描画
-    for (int i = 0; i < 6; i++) {
-        triangle3D(p[0], p[i + 1], p[i + 2], c, c, c);
+    for (int i = 0; i < numVtx - numAng; i++) {
+        //四角形
+        int a = i;
+        int b = i + numAng;
+        int c = (i + 1) % numAng == 0 ? i + 1 - numAng : i + 1;
+        int d = (b + 1) % numAng == 0 ? b + 1 - numAng : b + 1;
+        triangle3D(p[a], p[b], p[c], col, col, col);
+        triangle3D(p[c], p[b], p[d], col, col, col);
     }
 }
