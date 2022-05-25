@@ -31,6 +31,8 @@ void input(VECTOR& tran,VECTOR& rot,float speed)
 void gmain() {
     window(1920, 1080, full);
     hideCursor();
+    createPoint();
+    createSegment();
 
     //-----------------------------------------------------------------------
     //ベクトルaのオリジナルポジションoa
@@ -115,12 +117,13 @@ void gmain() {
         if (dispAxisFlag) {
             axis(white, 0.4f);
         }
+        float thickness = 9;
         VECTOR o(0, 0, 0);
-        segment(o, n, yellow, 1.5f);
-        segment(o, a, cyan, 1.5f);
-        point(a, cyan);
-        segment(o, n * d, red, 3.0f);
-        segment(a, n * d, white, 1.0f);
+        segment(o, n, yellow, thickness*0.8f);
+        segment(o, a, cyan, thickness);
+        point(a, cyan, 20);
+        segment(o, n * d, red, thickness);
+        segment(a, n * d, white, thickness/2);
         square(p, gray);
 
         //text info

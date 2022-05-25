@@ -1,26 +1,27 @@
-#include"graphic.h"
-#include"mathUtil.h"
-#include"VECTOR.h"
-#include"MATRIX.h"
 #include"view_proj.h"
+#include"graphic.h"
+#include"VECTOR.h"
+#include"mathUtil.h"
 #include"segment.h"
-
-//十字に交差する２つの四角ポリゴン
-const int numVertices = 8;
-float thickness = 0.002f;
-VECTOR op[numVertices] = {
-    VECTOR(1, 0, -thickness),
-    VECTOR(0, 0, -thickness),
-    VECTOR(0, 0, thickness),
-    VECTOR(1, 0, thickness),
-    VECTOR(1, -thickness, 0),
-    VECTOR(0, -thickness, 0),
-    VECTOR(0, thickness, 0),
-    VECTOR(1, thickness, 0),
-};
-//座標変換後の位置
-VECTOR p[numVertices];
-
+//多角柱を線分とする
+static const int numAng = 4;//角数。偶数であること。
+static const int numVtx = numAng * 2;//全頂点数
+static float radius = 0.0005f;//直径１ミリ
+static float x[2] = { 0.0f,1.0f };
+static VECTOR op[numVtx];
+static VECTOR p[numVtx];
+void createSegment()
+{
+    //原点から右へ伸びる角柱を作る
+    float angle = 3.1415926f / (numAng / 2);
+    for (int j = 0; j < 2; j++) {
+        for (int i = 0; i < numAng; i++) {
+            op[numAng * j + i].x = x[j];
+            op[numAng * j + i].y = Cos(angle * i) * radius;
+            op[numAng * j + i].z = Sin(angle * i) * radius;
+        }
+    }
+}
 void segment(const VECTOR& sp, const VECTOR& ep, const COLOR& col, float thickness)
 {
     VECTOR v = ep - sp;
@@ -28,22 +29,24 @@ void segment(const VECTOR& sp, const VECTOR& ep, const COLOR& col, float thickne
     float angleY = Atan2(-v.z, v.x);
     v.normalize();
     float angleZ = Acos(-v.y) - 1.57f;
-    MATRIX world;
-    world.identity();
-    world.mulTranslate(sp.x, sp.y, sp.z);
-    world.mulRotateY(angleY);
-    world.mulRotateZ(angleZ);
-    world.mulScaling(len, thickness, thickness);
-    for (int i = 0; i < numVertices; i++) {
-        //world座標変換
-        p[i] = world * op[i];
-        //gView座標変換
+    gWorld.identity();
+    gWorld.mulTranslate(sp.x, sp.y, sp.z);
+    gWorld.mulRotateY(angleY);
+    gWorld.mulRotateZ(angleZ);
+    gWorld.mulScaling(len, thickness, thickness);
+    for (int i = 0; i < numVtx; i++) {
+        p[i] = gWorld * op[i];
         p[i] = gView * p[i];
-        //projection座標変換
         p[i] = gProj * p[i];
     }
-    triangle3D(p[0], p[1], p[2], col, col, col);
-    triangle3D(p[0], p[2], p[3], col, col, col);
-    triangle3D(p[4], p[5], p[6], col, col, col);
-    triangle3D(p[4], p[6], p[7], col, col, col);
+    //描画
+    for (int i = 0; i < numAng; i++) {
+        //側面である四角形
+        int a = i;
+        int b = i + numAng;
+        int c = (i + 1) % numAng == 0 ? i + 1 - numAng : i + 1;
+        int d = (b + 1) % numAng == 0 ? b + 1 - numAng : b + 1;
+        triangle3D(p[a], p[b], p[c], col, col, col);
+        triangle3D(p[c], p[b], p[d], col, col, col);
+    }
 }
