@@ -29,7 +29,7 @@ public:
     void mulRotateY(float angle);
     void mulRotateX(float angle);
     void mulRotateYXZ(const VECTOR& r);
-    void mulRotateQuaternion(const QUATERNION& q);
+    void mulRotateQuaternion(const class QUATERNION& q);
     //行列と行列の掛け算
     MATRIX operator*(const MATRIX& m) const;
     //行列とベクトルの掛け算

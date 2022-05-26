@@ -67,13 +67,13 @@ void gmain()
 		//操作対象切換
 		if (isTrigger(KEY_Z))operateObjSw = 1 - operateObjSw;
 		//点の移動----------------------------------------------------
-		if (operateObjSw == 1) {
+		if (operateObjSw == 0) {
 			input(pTran, pRot, moveSpeed, angSpeed);
 		}
 		world.translate(pTran);
 		p = world * op;
 		//直線の回転、移動----------------------------------------------
-		if (operateObjSw == 0) {
+		if (operateObjSw == 1) {
 			input(lTran, lRot, moveSpeed, angSpeed);
 		}
 		world.translate(lTran);
@@ -91,8 +91,7 @@ void gmain()
 		// c = -ax-by
 		// このプログラムの変数を式に当てはめｃを求める。
 		// x,y座標は直線上のどの１点でもよい。
-		// 垂直ベクトルと反対方向に原点があるとc<0となる
-		float c = -n.x * sp.x - n.y * sp.y;//これって内積だよねdot(-n,sp)
+		float c = -n.x * sp.x - n.y * sp.y;
 		// 直線の式をyについて解くと
 		// y = ( -ax - c ) / b
 		// a,b,cがわかっているので点p.xからp.yを求めることができる
@@ -108,6 +107,7 @@ void gmain()
 		//点ｐ
 		VECTOR head = p + VECTOR(0, 0.2f);
 		mathSegment(p, head, cyan, 10);
+		mathPoint(head, cyan, 30);
 		mathPoint(p, pink, 20);
 		mathPoint(VECTOR(p.x,0), green, 20);
 
@@ -117,20 +117,20 @@ void gmain()
 		//mathSegment(VECTOR(0, 0), sp, red, 3);
 
 		//テキスト情報
-		float size = 50;
+		float size = 30;
 		float rowH = size + 10;
 		float colL = 10;
 		int num = 0;
 		textSize(size);
 		if (operateObjSw == 0)
-			text((let)"直線の", colL, ++num * rowH);
-		else
 			text((let)" 点 の", colL, ++num * rowH);
+		else
+			text((let)"直線の", colL, ++num * rowH);
 		if (isPress(KEY_SHIFT))
 			text((let)"回転 : shift + AD", colL + size * 3, num * rowH);
 		else
 			text((let)"移動 : ADWS", colL + size * 3, num * rowH);
 		text((let)"操作対象切換 : Z", colL, ++num * rowH);
-		text((let)"原点までの最短距離:" + c, colL, ++num * rowH);
+		text((let)"直線から原点までの最短距離:" + c, colL, ++num * rowH);
 	}
 }
