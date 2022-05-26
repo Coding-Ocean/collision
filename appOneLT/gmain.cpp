@@ -68,7 +68,7 @@ void gmain() {
     //その他------------------------------------------------------------------
     //色
     COLOR red(255, 0, 0);
-    COLOR pink(255, 200, 200);
+    COLOR pink(255, 160, 160);
     COLOR grayLight(140, 140, 140);
     COLOR gray(128, 128, 128);
     COLOR white(255, 255, 255);
@@ -79,6 +79,7 @@ void gmain() {
     //表示フラッグ
     bool dispAxisFlag = false;
     bool dispNormalFlag = false;
+    bool dispSquareFlag = true;
     //移動回転させるオブジェクトの選択
     int operateObjSw = 0;
     //プロジェクション行列を作っておく
@@ -92,6 +93,7 @@ void gmain() {
         {
             if (isTrigger(KEY_X)) { dispAxisFlag = !dispAxisFlag; }
             if (isTrigger(KEY_C)) { dispNormalFlag = !dispNormalFlag; }
+            if (isTrigger(KEY_V)) { dispSquareFlag = !dispSquareFlag; }
             if (isTrigger(KEY_Z)) { operateObjSw = 1 - operateObjSw; }
             if (isTrigger(KEY_R)) {
                 pTran.set(0, 0, 0);
@@ -151,10 +153,13 @@ void gmain() {
             }
             //平面
             triangle(tp, grayLight);
-            squareWithHole(triTran, triRot, gray);
+            if (dispSquareFlag) {
+                squareWithHole(triTran, triRot, gray);
+            }
             //ポイント
             segment(p, p+VECTOR(0,0.1f,0),cyan,9);
-            point(p+VECTOR(0,0.1f,0), pink,20);
+            point(p, pink, 20);
+            point(VECTOR(p.x,0,p.z), green, 20);
             //テキスト情報
             float size = 30;
             textSize(size);
