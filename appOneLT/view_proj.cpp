@@ -7,17 +7,17 @@
 extern MATRIX gWorld = { 0 }, gView = { 0 }, gProj = { 0 };
 //ÉJÉÅÉâÇÃà íuåàÇﬂópïœêî
 float oAngleY = 0 * TO_RAD;
-float oAngleX = 5 * TO_RAD;
+float oAngleX = 20 * TO_RAD;
 float angleY = oAngleY;
 float angleX = oAngleX;
-float radius = 2;
+float radius = 5;
 int swCam = 0;
 VECTOR camPos, lookat(0, 0, 0), up(0, 1, 0);
 float speed = 0.006f;
 
 void createProj()
 {
-    gProj.pers(45 * TO_RAD, width / height, 0.1f, 5);
+    gProj.pers(45 * TO_RAD, width / height, 0.1f, 10);
 }
 
 void updateView() 

@@ -10,13 +10,13 @@
     <ClCompile Include="gmain.cpp" />
     <ClCompile Include="axis.cpp" />
     <ClCompile Include="segment.cpp" />
-    <ClCompile Include="triangle.cpp" />
     <ClCompile Include="view_proj.cpp" />
     <ClCompile Include="wall.cpp" />
     <ClCompile Include="squareWithHole.cpp" />
     <ClCompile Include="point.cpp" />
     <ClCompile Include="sphere.cpp" />
     <ClCompile Include="cylinder.cpp" />
+    <ClCompile Include="TRIANGLE.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">
@@ -31,12 +31,12 @@
   <ItemGroup>
     <ClInclude Include="axis.h" />
     <ClInclude Include="segment.h" />
-    <ClInclude Include="triangle.h" />
     <ClInclude Include="view_proj.h" />
     <ClInclude Include="wall.h" />
     <ClInclude Include="squareWithHole.h" />
     <ClInclude Include="point.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="cylinder.h" />
+    <ClInclude Include="TRIANGLE.h" />
   </ItemGroup>
 </Project>

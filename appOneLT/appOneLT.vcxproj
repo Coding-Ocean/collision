@@ -156,7 +156,7 @@
     <ClCompile Include="segment.cpp" />
     <ClCompile Include="sphere.cpp" />
     <ClCompile Include="squareWithHole.cpp" />
-    <ClCompile Include="triangle.cpp" />
+    <ClCompile Include="TRIANGLE.cpp" />
     <ClCompile Include="view_proj.cpp" />
     <ClCompile Include="wall.cpp" />
   </ItemGroup>
@@ -173,7 +173,7 @@
     <ClInclude Include="segment.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="squareWithHole.h" />
-    <ClInclude Include="triangle.h" />
+    <ClInclude Include="TRIANGLE.h" />
     <ClInclude Include="view_proj.h" />
     <ClInclude Include="wall.h" />
   </ItemGroup>
