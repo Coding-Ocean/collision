@@ -78,18 +78,20 @@ void gmain() {
     COLOR blue(255, 0, 255);
     //表示フラッグ
     bool dispAxisFlag = false;
+    bool dispNormalFlag = false;
     //移動回転させるオブジェクトの選択
     int operateObjSw = 0;
     //プロジェクション行列を作っておく
     createProj();
     //メインループ-------------------------------------------------------------
     while (notQuit) {
-        clear(60);
+        clear();
         //カメラ行列を更新
         updateView();
         //表示切替、操作オブジェクト切り替え--------------------------------------
         {
             if (isTrigger(KEY_X)) { dispAxisFlag = !dispAxisFlag; }
+            if (isTrigger(KEY_C)) { dispNormalFlag = !dispNormalFlag; }
             if (isTrigger(KEY_Z)) { operateObjSw = 1 - operateObjSw; }
             if (isTrigger(KEY_R)) {
                 pTran.set(0, 0, 0);
@@ -113,7 +115,7 @@ void gmain() {
             if (operateObjSw == 1) {
                 input(triTran, triRot, speed);
             }
-            //今回は移動してからの回転
+            //＊＊＊今回は移動してからの回転＊＊＊
             gWorld.identity();
             gWorld.mulRotateYXZ(triRot);
             gWorld.mulTranslate(triTran);
@@ -139,11 +141,13 @@ void gmain() {
         {
             if (dispAxisFlag) {
                 //軸
-                axis(white, 0.4f);
+                axis(white, 2);
+            }
+            if(dispNormalFlag){
                 //法線
-                segment(VECTOR(0, 0, 0), n, white);
+                segment(VECTOR(0, 0, 0), n, white,6);
                 //原点から平面までの最短距離
-                segment(VECTOR(0, 0, 0), n * -d, yellow, 2);
+                segment(VECTOR(0, 0, 0), n * -d, yellow, 7);
             }
             //平面
             triangle(tp, grayLight);

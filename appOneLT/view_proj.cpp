@@ -10,7 +10,7 @@ float oAngleY = 0 * TO_RAD;
 float oAngleX = 5 * TO_RAD;
 float angleY = oAngleY;
 float angleX = oAngleX;
-float radius = 3;
+float radius = 2;
 int swCam = 0;
 VECTOR camPos, lookat(0, 0, 0), up(0, 1, 0);
 float speed = 0.006f;
