@@ -132,7 +132,7 @@ void gmain() {
         //平面の式を求め「p.xとp.z」から「p.y」を求める----------------------------
         {
             // 平面の式 ax+by+cz+d=0;
-            // ベクトル(a,b,c)は面の法線。dは原点から平面までの最短距離。
+            // ベクトル(a,b,c)は面の法線。dは平面から原点までの最短距離。
             // 未定のdを求める
             // d=-ax-by-cz
             d = -n.x * tp[0].x - n.y * tp[0].y - n.z * tp[0].z;
@@ -148,7 +148,7 @@ void gmain() {
             if(dispNormalFlag){
                 //法線
                 segment(VECTOR(0, 0, 0), n, white,6);
-                //原点から平面までの最短距離
+                //平面から原点までの最短距離
                 segment(VECTOR(0, 0, 0), n * -d, yellow, 7);
             }
             //平面
@@ -157,7 +157,9 @@ void gmain() {
                 squareWithHole(triTran, triRot, gray);
             }
             //ポイント
-            segment(p, p+VECTOR(0,0.1f,0),cyan,9);
+            VECTOR head = p + VECTOR(0, 0.1f, 0);
+            segment(p, head, cyan,9);
+            point(head, cyan, 30);
             point(p, pink, 20);
             point(VECTOR(p.x,0,p.z), green, 20);
             //テキスト情報
@@ -177,7 +179,7 @@ void gmain() {
             text("操作対象切換 : Z", colL, ++num * rowH);
             text("位置回転リセット : R", colL, ++num * rowH);
             text("軸表示 : X", colL, ++num * rowH);
-            text((let)"原点から平面までの最短距離:"+d, colL, ++num * rowH);
+            text((let)"平面から原点までの最短距離:"+d, colL, ++num * rowH);
         }
     }
 }
