@@ -108,7 +108,8 @@ void gmain()
 		//点ｐ
 		VECTOR head = p + VECTOR(0, 0.2f);
 		mathSegment(p, head, cyan, 10);
-		mathPoint(head, pink, 20);
+		mathPoint(p, pink, 20);
+		mathPoint(VECTOR(p.x,0), green, 20);
 
 		//ｃを求める式は逆垂線ベクトルとsｐとの内積と同じ
 		//mathSegment(VECTOR(0, 0), -n*dot(-n,sp), red, 3);
