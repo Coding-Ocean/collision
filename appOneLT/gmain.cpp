@@ -59,6 +59,9 @@ void gmain()
 	COLOR lineColor;
 	COLOR gray(128, 128, 128);
 	COLOR red(255, 0, 0);
+	COLOR magenta(255, 0, 255);
+	//
+	bool dispDot = false;
 	//メインループ
 	while (notQuit)
 	{
@@ -87,17 +90,32 @@ void gmain()
 		// 直線の式の一般形 
 		// ax + by + c = 0
 		// aは垂直ベクトルのｘ、bは垂直ベクトルのｙ、cは直線から原点までの最短距離
+
 		// cについて解くと
 		// c = -ax-by
 		// このプログラムの変数を式に当てはめｃを求める。
 		// x,y座標は直線上のどの１点でもよい。
 		float c = -n.x * sp.x - n.y * sp.y;
+		{
+			//上の式は、逆垂線ベクトルと直線上の１点へのベクトルとの内積
+			//c = dot(-n,sp);//上の式は、逆垂線ベクトルと直線上の１点へのベクトルとの内積
+		}
+		
 		// 直線の式をyについて解くと
 		// y = ( -ax - c ) / b
 		// a,b,cがわかっているので点p.xからp.yを求めることができる
 		p.y = (-n.x * p.x - c) / n.y;
-
 		//描画------------------------------------------------------------
+		//一歩進んだ解説用
+		{
+			//このベクトルを表示すると
+			//ｃを求める式は「逆垂線ベクトルとsｐとの内積」と同じであることがわかる
+			if (isTrigger(KEY_C))dispDot = !dispDot;
+			if (dispDot) {
+				mathSegment(VECTOR(0, 0), -n, red, 3);
+				mathSegment(VECTOR(0, 0), sp, magenta, 3);
+			}
+		}
 		//直線
 		mathSegment(sp, ep, lineColor, 6);
 		//垂線ベクトル
@@ -111,10 +129,6 @@ void gmain()
 		mathPoint(p, pink, 20);
 		mathPoint(VECTOR(p.x,0), green, 20);
 
-		//ｃを求める式は逆垂線ベクトルとsｐとの内積と同じ
-		//mathSegment(VECTOR(0, 0), -n*dot(-n,sp), red, 3);
-		//mathSegment(VECTOR(0, 0), -n, red, 3);
-		//mathSegment(VECTOR(0, 0), sp, red, 3);
 
 		//テキスト情報
 		float size = 30;
