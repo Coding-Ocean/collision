@@ -6,35 +6,64 @@
 //行列
 extern MATRIX gWorld = { 0 }, gView = { 0 }, gProj = { 0 };
 //カメラの位置決め用変数
-float oAngleY = 0 * TO_RAD;
+float oAngleY = -10 * TO_RAD;
 float oAngleX = 20 * TO_RAD;
+float oRadius = 5;
 float angleY = oAngleY;
 float angleX = oAngleX;
-float radius = 5;
+float radius = oRadius;
 int swCam = 0;
 VECTOR camPos, lookat(0, 0, 0), up(0, 1, 0);
 float speed = 0.006f;
+let info = "Perspective";
 
 void createProj()
 {
     gProj.pers(45 * TO_RAD, width / height, 0.1f, 10);
 }
 
+void createOrthoProj()
+{
+    float scale = 500;
+    float w = width / scale, h = height / scale;
+    gProj.ortho(-w, w, -h, h, -10, 10);
+}
+
 void updateView() 
 {
-
-    if (isTrigger(KEY_SPACE)) {
-        ++swCam %= 4;
-        if (swCam == 0) {
-            angleY = oAngleY;
-            angleX = oAngleX;
-        }
-    }
-
+    //初期状態に戻す
     if (isTrigger(KEY_P)) {
         swCam = 0;
+        createProj();
         angleY = oAngleY;
         angleX = oAngleX;
+        radius = oRadius;
+        info = "Perspective";
+    }
+    //View切換
+    if (isTrigger(KEY_SPACE)) {
+        ++swCam %= 3;
+        switch(swCam){
+        case 0:
+            createProj();
+            angleY = oAngleY;
+            angleX = oAngleX;
+            radius = oRadius;
+            info = "Perspective";
+            break;
+        case 1:
+            createOrthoProj();
+            info = "Front";
+            break;
+        case 2:
+            createOrthoProj();
+            info = "Top";
+            break;
+        case 3:
+            createOrthoProj();
+            info = "Right";
+            break;
+        }
     }
 
     if (swCam == 0) {
@@ -42,6 +71,9 @@ void updateView()
         if (isPress(KEY_J))angleY -= speed;
         if (isPress(KEY_I))angleX += speed;
         if (isPress(KEY_K))angleX -= speed;
+        if (isPress(KEY_U))radius -= speed;
+        if (isPress(KEY_O))radius += speed;
+        if (radius < 1.0f)radius = 1.0f;
         if (angleX > 1.57f)angleX = 1.57f;
         if (angleX < -1.57f)angleX = -1.57f;
     }
@@ -62,4 +94,8 @@ void updateView()
     camPos.y = Sin(angleX) * radius;
     camPos.z = Cos(angleY) * Cos(angleX) * radius;
     gView.camera(camPos, lookat, up);
+
+    textSize(30);
+    textMode(BOTTOM);
+    text(info, width - 180, height);
 }
