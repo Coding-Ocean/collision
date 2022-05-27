@@ -8,9 +8,10 @@ extern MATRIX gWorld = { 0 }, gView = { 0 }, gProj = { 0 };
 //ƒJƒƒ‰‚ÌˆÊ’uŒˆ‚ß—p•Ï”
 float oAngleY = 0 * TO_RAD;
 float oAngleX = 5 * TO_RAD;
+float oRadius = 2.5f;
 float angleY = oAngleY;
 float angleX = oAngleX;
-float radius = 2;
+float radius = oRadius;
 int swCam = 0;
 VECTOR camPos, lookat(0, 0, 0), up(0, 1, 0);
 float speed = 0.006f;
@@ -22,19 +23,20 @@ void createProj()
 
 void updateView() 
 {
+    if (isTrigger(KEY_P)) {
+        swCam = 0;
+        angleY = oAngleY;
+        angleX = oAngleX;
+        radius = oRadius;
+    }
 
     if (isTrigger(KEY_SPACE)) {
         ++swCam %= 4;
         if (swCam == 0) {
             angleY = oAngleY;
             angleX = oAngleX;
+            radius = oRadius;
         }
-    }
-
-    if (isTrigger(KEY_P)) {
-        swCam = 0;
-        angleY = oAngleY;
-        angleX = oAngleX;
     }
 
     if (swCam == 0) {
@@ -42,6 +44,8 @@ void updateView()
         if (isPress(KEY_J))angleY -= speed;
         if (isPress(KEY_I))angleX += speed;
         if (isPress(KEY_K))angleX -= speed;
+        if (isPress(KEY_U))radius -= speed;
+        if (isPress(KEY_O))radius += speed;
         if (angleX > 1.57f)angleX = 1.57f;
         if (angleX < -1.57f)angleX = -1.57f;
     }

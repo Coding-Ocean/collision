@@ -40,8 +40,8 @@ void gmain() {
     VECTOR op(0, 0, 0);
     //点の座標変換後のポジションp
     VECTOR p;
-    VECTOR pTran;//セグメントの移動用 point translate
-    VECTOR pRot;//セグメントの回転用 point rotate
+    VECTOR pTran;//点の移動用 point translate
+    VECTOR pRot;//これは使わない
     //-----------------------------------------------------------------------
     //三角形頂点のオリジナルポジションotp[3]と法線ベクトルon
     VECTOR otp[3];
@@ -58,16 +58,18 @@ void gmain() {
     VECTOR n;
     VECTOR triTran;//三角形の移動用 triangle translate
     VECTOR triRot(0,0,0.4f);//三角形の回転用 triangle rotate
+
     //-----------------------------------------------------------------------
-    //原点から平面までの最短距離
+    //平面から原点までの最短距離
     float d = 0;
+    
     //-----------------------------------------------------------------------
     //点と三角形を座標変換するための共用データ
     float speed = 0.003f;
-
     //その他------------------------------------------------------------------
     //色
     COLOR red(255, 0, 0);
+    COLOR magenta(255, 0, 255);
     COLOR pink(255, 160, 160);
     COLOR grayLight(140, 140, 140);
     COLOR gray(128, 128, 128);
@@ -135,7 +137,8 @@ void gmain() {
             // ベクトル(a,b,c)は面の法線。dは平面から原点までの最短距離。
             // 未定のdを求める
             // d=-ax-by-cz
-            d = -n.x * tp[0].x - n.y * tp[0].y - n.z * tp[0].z;
+            //d = -n.x * tp[0].x - n.y * tp[0].y - n.z * tp[0].z;
+            d = dot(-n, tp[0]);
             // y=(-ax-cz-d)/b
             p.y = (-n.x * p.x - n.z * p.z - d) / n.y;
         }
@@ -146,10 +149,16 @@ void gmain() {
                 axis(white, 2);
             }
             if(dispNormalFlag){
-                //法線
-                segment(VECTOR(0, 0, 0), n, white,6);
-                //平面から原点までの最短距離
+                //法線ベクトル
+                segment(VECTOR(0, 0, 0), n, white, 6);
+                //平面から原点までの最短距離の見える化
                 segment(VECTOR(0, 0, 0), n * -d, yellow, 7);
+            }
+            if (!dispSquareFlag) {
+                //平面の式 ax + by + cz + d = 0 の d は
+                //「-nと平面上の１点との内積」ということがわかる線分
+                segment(VECTOR(0, 0, 0), -n, red, 5);
+                segment(VECTOR(0, 0, 0), tp[1], magenta, 5);
             }
             //平面
             triangle(tp, grayLight);
@@ -157,7 +166,7 @@ void gmain() {
                 squareWithHole(triTran, triRot, gray);
             }
             //ポイント
-            VECTOR head = p + VECTOR(0, 0.1f, 0);
+            VECTOR head = p + VECTOR(0, 0.2f, 0);
             segment(p, head, cyan,9);
             point(head, cyan, 30);
             point(p, pink, 20);
