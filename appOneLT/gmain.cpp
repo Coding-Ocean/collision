@@ -65,7 +65,7 @@ void gmain() {
     
     //-----------------------------------------------------------------------
     //点と三角形を座標変換するための共用データ
-    float speed = 0.003f;
+    float speed = 0.01f;
     //その他------------------------------------------------------------------
     //色
     COLOR red(255, 0, 0);
@@ -81,6 +81,7 @@ void gmain() {
     //表示フラッグ
     bool dispAxisFlag = false;
     bool dispNormalFlag = false;
+    bool dispDotFlag = false;
     bool dispSquareFlag = true;
     //移動回転させるオブジェクトの選択
     int operateObjSw = 0;
@@ -95,7 +96,8 @@ void gmain() {
         {
             if (isTrigger(KEY_X)) { dispAxisFlag = !dispAxisFlag; }
             if (isTrigger(KEY_C)) { dispNormalFlag = !dispNormalFlag; }
-            if (isTrigger(KEY_V)) { dispSquareFlag = !dispSquareFlag; }
+            if (isTrigger(KEY_V)) { dispDotFlag = !dispDotFlag; }
+            if (isTrigger(KEY_F)) { dispSquareFlag = !dispSquareFlag; }
             if (isTrigger(KEY_Z)) { operateObjSw = 1 - operateObjSw; }
             if (isTrigger(KEY_R)) {
                 pTran.set(0, 0, 0);
@@ -133,12 +135,14 @@ void gmain() {
         }
         //平面の式を求め「p.xとp.z」から「p.y」を求める----------------------------
         {
-            // 平面の式 ax+by+cz+d=0;
+            // 平面の式 ax + by + cz + d = 0
             // ベクトル(a,b,c)は面の法線。dは平面から原点までの最短距離。
+            
             // 未定のdを求める
-            // d=-ax-by-cz
+            // d = -ax-by-cz
             //d = -n.x * tp[0].x - n.y * tp[0].y - n.z * tp[0].z;
             d = dot(-n, tp[0]);
+        
             // y=(-ax-cz-d)/b
             p.y = (-n.x * p.x - n.z * p.z - d) / n.y;
         }
@@ -150,11 +154,11 @@ void gmain() {
             }
             if(dispNormalFlag){
                 //法線ベクトル
-                segment(VECTOR(0, 0, 0), n, white, 6);
+                segment(VECTOR(0, 0, 0), n, white, 4);
                 //平面から原点までの最短距離の見える化
                 segment(VECTOR(0, 0, 0), n * -d, yellow, 7);
             }
-            if (!dispSquareFlag) {
+            if (dispDotFlag) {
                 //平面の式 ax + by + cz + d = 0 の d は
                 //「-nと平面上の１点との内積」ということがわかる線分
                 segment(VECTOR(0, 0, 0), -n, red, 5);
