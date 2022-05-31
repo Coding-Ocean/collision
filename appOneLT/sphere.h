@@ -1,3 +1,3 @@
 #pragma once
 void createSphere();
-void sphere(const VECTOR& t, const COLOR& c, float diameter);
+void sphere(const class VECTOR& t, const struct COLOR& c, float diameter);

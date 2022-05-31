@@ -6,15 +6,15 @@
 //行列
 extern MATRIX gWorld = { 0 }, gView = { 0 }, gProj = { 0 };
 //カメラの位置決め用変数
-float oAngleY = -10 * TO_RAD;
+float oAngleY = 20 * TO_RAD;
 float oAngleX = 20 * TO_RAD;
-float oRadius = 5;
+float oRadius = 2;
 float angleY = oAngleY;
 float angleX = oAngleX;
 float radius = oRadius;
 int swCam = 0;
 VECTOR camPos, lookat(0, 0, 0), up(0, 1, 0);
-float speed = 0.006f;
+float speed = 0.01f;
 let info = "Perspective";
 
 void createProj()
@@ -24,8 +24,8 @@ void createProj()
 
 void createOrthoProj()
 {
-    float scale = 500;
-    float w = width / scale, h = height / scale;
+    float w = radius * 0.73f;
+    float h = w / width * height;
     gProj.ortho(-w, w, -h, h, -10, 10);
 }
 
@@ -42,13 +42,13 @@ void updateView()
     }
     //View切換
     if (isTrigger(KEY_SPACE)) {
-        ++swCam %= 3;
+        ++swCam %= 4;
         switch(swCam){
         case 0:
             createProj();
             angleY = oAngleY;
             angleX = oAngleX;
-            radius = oRadius;
+            //radius = oRadius;
             info = "Perspective";
             break;
         case 1:
