@@ -15,39 +15,103 @@ bool intersects(
 
     //線分の終点から球体の中心点までのベクトル
     pv = p - ep;
-    if (pv.magSq() < radiusSq)return true;
+    if (pv.magSq() < radiusSq) return true;
 
     //線分の始点から球体の中心点までのベクトル
     pv = p - sp;
-    if (pv.magSq() < radiusSq)return true;
+    if (pv.magSq() < radiusSq) return true;
 
     //線分(始点から終点へ)の正規化ベクトル
     VECTOR sv = (ep - sp).normalize();
+    //svとpvの内積。（pvは始点から中心点までのベクトル）
     float d = dot(sv, pv);
+    //内積の値が０より大きく、線分ベクトルの大きさより小さいなら
+    if (0 < d && d < segLen) {
+        //svを長さdのベクトルにする
+        sv *= d;
+        //ベクトルの引き算でpvを「線分から球体の中心点までの最短ベクトル」に書き換える
+        pv -= sv;
+        if (pv.magSq() < radiusSq) return true;
+    }
+
+    return false;
+}
+
+//解説用ベクトル表示バージョン
+bool intersects_(
+    const VECTOR& p, float radius, //球
+    const VECTOR& sp, const VECTOR& ep, float segLen //線分
+)
+{
+    textSize(50);
+
+    float radiusSq = radius * radius;
+    VECTOR pv;
+
+    //線分の終点から球体の中心点までのベクトル
+    pv = p - ep;
+    if (pv.magSq() < radiusSq) {
+        segment(ep, p, COLOR(0, 255, 0), 12);
+        fill(COLOR(0, 255, 0));
+        text("pv = p - ep;", 30, 80);
+        return true;
+    }
+
+    //線分の始点から球体の中心点までのベクトル
+    pv = p - sp;
+    if (pv.magSq() < radiusSq) {
+        segment(sp, p, COLOR(0, 255, 0), 12);
+        fill(COLOR(0, 255, 0));
+        text("pv = p - sp;", 30, 80);
+        return true;
+    }
+
+    //線分(始点から終点へ)の正規化ベクトル
+    VECTOR sv = (ep - sp).normalize();
+    //svとpv（始点から中心点までのベクトル)の内積
+    float d = dot(sv, pv);
+
+    static int sw = 5;
     {
         //解説用ベクトル表示
-        static int sw = 5;
         if (isTrigger(KEY_C)) { --sw; if (sw < 0)sw = 5; }
+        text(sw == 5 ? "_" : "", 1900, 50);
         switch (sw) {
-        case 0://最短ベクトル
-            segment(sp + sv * d, p, COLOR(255, 255, 0), 12);
-        case 1://正規化ベクトル＊内積
-            segment(sp, sp + sv * d, COLOR(255, 0, 255), 12);
-        case 2:
-            textSize(50);
-            text((let)"内積:" + d,800,100);
+        case 0:
+        case 1:
+        case 2: //内積
+            fill(COLOR(255, 255, 255));
+            text((let)"d = dot(sv,pv); ⇒ " + d, 30, 200);
         case 3: //線分正規化ベクトル
             segment(sp, sp + sv, COLOR(0, 255, 255), 9);
+            fill(COLOR(0, 255, 255));
+            text("sv = (ep-sp).normalize();", 30, 140);
         case 4: //始点⇒中心点
             segment(sp, p, COLOR(0, 255, 0), 12);
+            fill(COLOR(0, 255, 0));
+            text("pv = p - sp;", 30, 80);
         }
     }
-    if (0.0f < d && d < segLen) {
-        //線分から球体の中心点までの最短ベクトル
-        VECTOR nearV = pv - sv * d;
-        if (nearV.magSq() < radiusSq) {
-            return true;
+    //内積の値が０より大きく、線分の大きさより小さいなら
+    if (0 < d && d < segLen) {
+        {
+            //解説用ベクトル表示
+            switch (sw) {
+            case 0://最短ベクトル
+                segment(sp + sv * d, p, COLOR(255, 255, 0), 12);
+                fill(255, 255, 0);
+                text("pv -= sv;", 30, 320);
+            case 1://正規化ベクトル＊内積
+                segment(sp, sp + sv * d, COLOR(255, 0, 255), 12);
+                fill(COLOR(255, 0, 255));
+                text("sv *= d;", 30, 260);
+            }
         }
+        //svを長さdのベクトルにする
+        sv *= d;
+        //ベクトルの引き算でpvを「線分から球体の中心点までの最短ベクトル」に書き換える
+        pv -= sv;
+        if (pv.magSq() < radiusSq) return true;
     }
 
     return false;
@@ -100,7 +164,7 @@ void gmain() {
         //デルタタイム設定
         setDeltaTime();
         //更新中のデータを表示するため、ここでクリア
-        clear(50,100,200);
+        clear(30,80,180);
         //カメラ行列を更新
         updateView();
         //表示切替、操作オブジェクト切り替え--------------------------------------
@@ -137,7 +201,7 @@ void gmain() {
         }
         //当たり判定----------------------------------------------------------
         {
-            bool flag = intersects(p, radius, sp, ep, segLen);
+            bool flag = intersects_(p, radius, sp, ep, segLen);
             if (flag) sphColor = transRed;
             else sphColor = transWhite;
         }
@@ -157,6 +221,7 @@ void gmain() {
             float colL = 10;//列の始まり
             float rowH = size + 10;//行の高さ
             int num = 0;//行番号
+            fill(COLOR(255, 255, 255));
             text((let)"", colL, ++num * rowH);
         }
     }

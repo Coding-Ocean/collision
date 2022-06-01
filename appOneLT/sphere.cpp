@@ -3,10 +3,10 @@
 #include"VECTOR.h"
 #include"mathUtil.h"
 static const int numAng = 40;//角数。偶数であること。
-static const int numVtx = numAng * (numAng / 2 - 1)+2;//全頂点数
+static const int numVtx = numAng * (numAng / 2 - 1) + 2;//全頂点数
 static VECTOR op[numVtx];
 static float bright[numVtx];
-static VECTOR light(0, 0, 1);
+static VECTOR light(0.3f, 0.3f, 1);
 static float ambient = 0.3f;
 void createSphere()
 {

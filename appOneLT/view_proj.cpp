@@ -12,10 +12,10 @@ float oRadius = 2;
 float angleY = oAngleY;
 float angleX = oAngleX;
 float radius = oRadius;
-int swCam = 0;
 VECTOR camPos, lookat(0, 0, 0), up(0, 1, 0);
 float speed = 0.01f;
-let info = "Perspective";
+int swCam = 1;
+let info = "Front";
 
 void createProj()
 {
