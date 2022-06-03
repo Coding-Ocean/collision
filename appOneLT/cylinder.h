@@ -1,3 +1,3 @@
 #pragma once
 void createCylinder();
-void cylinder(const VECTOR& t, const COLOR& col);
+void cylinder(const class VECTOR& t, const struct COLOR& col, float scale);

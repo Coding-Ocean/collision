@@ -5,34 +5,76 @@
 #include"segment.h"
 #include"point.h"
 #include"sphere.h"
+#include"cylinder.h"
+
 bool intersects(
     const VECTOR& p, float radius, //球
     const VECTOR& sp, const VECTOR& ep, float segLen //線分
 ) 
 {
+    VECTOR v(0, 1, 0);
+    float cylinderLen = 1.0f;
+    VECTOR sv = (ep - sp).normalize();
     float radiusSq = radius * radius;
+
     VECTOR pv;
 
-    //線分の終点から球体の中心点までのベクトル
-    pv = p - ep;
-    if (pv.magSq() < radiusSq) return true;
-
-    //線分の始点から球体の中心点までのベクトル
-    pv = p - sp;
-    if (pv.magSq() < radiusSq) return true;
-
-    //線分(始点から終点へ)の正規化ベクトル
-    VECTOR sv = (ep - sp).normalize();
-    //svとpvの内積。（pvは始点から中心点までのベクトル）
-    float d = dot(sv, pv);
-    //内積の値が０より大きく、線分ベクトルの大きさより小さいなら
-    if (0 < d && d < segLen) {
-        //svを長さdのベクトルにする
-        sv *= d;
-        //ベクトルの引き算でpvを「線分から球体の中心点までの最短ベクトル」に書き換える
-        pv -= sv;
-        if (pv.magSq() < radiusSq) return true;
+    VECTOR _cross = cross(v, sv);
+    float len = _cross.sqMag();
+    if (len < 0.000001f) {
+        //平行ベクトルのとき
+        VECTOR v_ = cross(sp - p, v);
+        //*n = p - P[i];
+        if (v_.magSq() < radiusSq) {
+            if (sv.y > 0) {
+                if (sp.y + segLen > p.y && sp.y < p.y + cylinderLen) {
+                    return true;
+                }
+            }
+            else {
+                if (sp.y > p.y && sp.y - segLen < p.y + cylinderLen) {
+                    return true;
+                }
+            }
+        }
     }
+    else {
+        float dv = dot(v, sv);
+        float dA = dot(sp - p, v);
+        float dB = dot(sp - p, sv);
+        float lenA = (dA - dB * dv) / (1.0f - dv * dv);
+        float lenB = (dB - dA * dv) / (dv * dv - 1.0f);
+        VECTOR qA = p + v * lenA;
+        VECTOR qB = sp + sv * lenB;
+
+        segment(p, p + v * lenA, COLOR(255, 255, 0), 10);
+        segment(sp, sp + sv * lenB, COLOR(255, 0, 0), 10);
+        print(lenA);
+        print(lenB);
+        point(qA, COLOR(255, 255, 0), 50);
+        point(qB, COLOR(255, 0, 0), 50);
+        pv = qA - qB;
+        segment(qB, qA, COLOR(255, 0, 255), 10);
+
+        if (pv.magSq() < radiusSq) {
+            if (0 <= lenA && lenA <= cylinderLen) {
+                if (0 <= lenB && lenB <= segLen) {
+                    return true;
+                }
+            }
+        }
+    }
+    //線分(始点から終点へ)の正規化ベクトル
+    //svとpvの内積。（pvは始点から中心点までのベクトル）
+    //float d = dot(sv, pv);
+    //内積の値が０より大きく、線分ベクトルの大きさより小さいなら
+    //if (0 < d && d < segLen) {
+    //    //svを長さdのベクトルにする
+    //    sv *= d;
+    //    //ベクトルの引き算でpvを「線分から球体の中心点までの最短ベクトル」に書き換える
+    //    pv -= sv;
+    //    if (pv.magSq() < radiusSq) return true;
+    //}
 
     return false;
 }
@@ -122,10 +164,10 @@ void gmain() {
     hideCursor();
     createSegment();
     createPoint();
-    createSphere();
+    createCylinder();
     //-----------------------------------------------------------------------
     //線分のオリジナルポジションosp,oep
-    VECTOR osp(0, 0.4f, 0);//original start point
+    VECTOR osp(0.0001f, 0.4f, 0);//original start point
     VECTOR oep(0, -0.4f, 0);//original end point
     VECTOR w = oep - osp;
     float segLen = w.mag();
@@ -141,7 +183,7 @@ void gmain() {
     VECTOR p;
     VECTOR sphTran(0.0f, 0.0f, 0.0f);//球体の移動用 sphere translate
     VECTOR sphRot;
-    float radius = 0.3f;
+    float radius = 0.2f;
     //移動回転スピード
     MATRIX world;
     float speed = 0.3f;
@@ -154,7 +196,7 @@ void gmain() {
     COLOR white(220, 220, 220);
     COLOR transRed(255, 0, 0, 150);
     COLOR transWhite(255, 255, 255,180);
-    COLOR sphColor = transWhite;
+    COLOR cylinderColor = transWhite;
     //プロジェクション行列を作っておく
     createProj();
     //デルタタイム初期化
@@ -201,9 +243,9 @@ void gmain() {
         }
         //当たり判定----------------------------------------------------------
         {
-            bool flag = intersects_(p, radius, sp, ep, segLen);
-            if (flag) sphColor = transRed;
-            else sphColor = transWhite;
+            bool flag = intersects(p, radius, sp, ep, segLen);
+            if (flag) cylinderColor = transRed;
+            else cylinderColor = transWhite;
         }
         //描画----------------------------------------------------------------
         {
@@ -213,8 +255,8 @@ void gmain() {
             segment(sp, ep, white, 10);
             point(sp, white, 10);
             point(ep, white, 10);
-            //球体
-            sphere(p, sphColor, radius);
+            //
+            cylinder(p, cylinderColor, radius);
             //テキスト情報
             float size = 30;
             textSize(size);
