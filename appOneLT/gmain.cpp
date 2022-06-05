@@ -16,19 +16,18 @@ void gmain() {
     //フィールドを構成する三角ポリゴン（座標は固定）
     const int num = 8;
     TRIANGLE triangles[num];
-    VECTOR center;
     //左側の山
-    center.set(-1.0f, 0.8f, 0.3f);
-    triangles[0].create(center, VECTOR(-2, 0, -1), VECTOR(-2, 0, 1));
-    triangles[1].create(center, VECTOR(-2, 0, 1), VECTOR(0, 0, 1));
-    triangles[2].create(center, VECTOR(0, 0, 1), VECTOR(0, 0, -1));
-    triangles[3].create(center, VECTOR(0, 0, -1), VECTOR(-2, 0, -1));
+    VECTOR top(-1.0f, 0.8f, 0.3f);
+    triangles[0].create(top, VECTOR(-2, 0, -1), VECTOR(-2, 0, 1));
+    triangles[1].create(top, VECTOR(-2, 0, 1), VECTOR(0, 0, 1));
+    triangles[2].create(top, VECTOR(0, 0, 1), VECTOR(0, 0, -1));
+    triangles[3].create(top, VECTOR(0, 0, -1), VECTOR(-2, 0, -1));
     //右側の谷
-    center.set(1.3f, -0.5f, -0.5f);
-    triangles[4].create(center, VECTOR(0, 0, -1), VECTOR(0, 0, 1));
-    triangles[5].create(center, VECTOR(0, 0, 1), VECTOR(2, 0, 1));
-    triangles[6].create(center, VECTOR(2, 0, 1), VECTOR(2, 0, -1));
-    triangles[7].create(center, VECTOR(2, 0, -1), VECTOR(0, 0, -1));
+    VECTOR bottom(1.3f, -0.5f, -0.5f);
+    triangles[4].create(bottom, VECTOR(0, 0, -1), VECTOR(0, 0, 1));
+    triangles[5].create(bottom, VECTOR(0, 0, 1), VECTOR(2, 0, 1));
+    triangles[6].create(bottom, VECTOR(2, 0, 1), VECTOR(2, 0, -1));
+    triangles[7].create(bottom, VECTOR(2, 0, -1), VECTOR(0, 0, -1));
     //-----------------------------------------------------------------------
     //キャラクタ(点)
     VECTOR p;

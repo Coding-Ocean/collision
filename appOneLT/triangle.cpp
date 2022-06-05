@@ -13,7 +13,7 @@ void TRIANGLE::create(const VECTOR& p0, const VECTOR& p1, const VECTOR& p2)
     //法線ベクトル
     N = cross(S[0], S[1]).normalize();
     //平面の式 ax+by+cz+d=0 のｄ
-    D = -N.x * p0.x - N.y * p0.y - N.z * p0.z;
+    D = dot(-N, p0);
 }
 
 bool TRIANGLE::contains(const VECTOR& p)
