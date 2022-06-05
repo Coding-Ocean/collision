@@ -44,6 +44,8 @@ bool intersects_(
 )
 {
     textSize(50);
+    static int sw = 6;
+    if (isTrigger(KEY_C)) { --sw; if (sw < 0)sw = 6; }
 
     float radiusSq = radius * radius;
     VECTOR pv;
@@ -51,18 +53,22 @@ bool intersects_(
     //線分の終点から球体の中心点までのベクトル
     pv = p - ep;
     if (pv.magSq() < radiusSq) {
-        segment(ep, p, COLOR(0, 255, 0), 12);
-        fill(COLOR(0, 255, 0));
-        text("pv = p - ep;", 30, 80);
+        if (sw == 5) {
+            segment(ep, p, COLOR(255, 255, 0), 12);
+            fill(COLOR(255, 255, 0));
+            text("pv = p - ep;", 30, 80);
+        }
         return true;
     }
 
     //線分の始点から球体の中心点までのベクトル
     pv = p - sp;
     if (pv.magSq() < radiusSq) {
-        segment(sp, p, COLOR(0, 255, 0), 12);
-        fill(COLOR(0, 255, 0));
-        text("pv = p - sp;", 30, 80);
+        if (sw == 5) {
+            segment(sp, p, COLOR(255, 255, 0), 12);
+            fill(COLOR(255, 255, 0));
+            text("pv = p - sp;", 30, 80);
+        }
         return true;
     }
 
@@ -71,10 +77,8 @@ bool intersects_(
     //svとpv（始点から中心点までのベクトル)の内積
     float d = dot(sv, pv);
 
-    static int sw = 5;
+    //解説用ベクトル表示
     {
-        //解説用ベクトル表示
-        if (isTrigger(KEY_C)) { --sw; if (sw < 0)sw = 5; }
         text(sw == 5 ? "_" : "", 1900, 50);
         switch (sw) {
         case 0:
@@ -201,7 +205,7 @@ void gmain() {
         }
         //当たり判定----------------------------------------------------------
         {
-            bool flag = intersects_(p, radius, sp, ep, segLen);
+            bool flag = intersects(p, radius, sp, ep, segLen);
             if (flag) sphColor = transRed;
             else sphColor = transWhite;
         }
