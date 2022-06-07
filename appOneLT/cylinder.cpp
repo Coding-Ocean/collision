@@ -41,7 +41,6 @@ void createCylinder()
 }
 void cylinder(const VECTOR& t, const COLOR& col, float s)
 {
-    
     gWorld.identity();
     gWorld.mulTranslate(t);
     gWorld.mulScaling(s, 1, s);
@@ -59,8 +58,12 @@ void cylinder(const VECTOR& t, const COLOR& col, float s)
         int b = i + numAng;
         int c = (i + 1) % numAng == 0 ? i + 1 - numAng : i + 1;
         int d = (b + 1) % numAng == 0 ? b + 1 - numAng : b + 1;
-        triangle3D(p[a], p[b], p[c], col*bright[a], col*bright[b], col*bright[c]);
-        triangle3D(p[c], p[b], p[d], col * bright[c], col * bright[b], col * bright[d]);
+        VECTOR m = p[b] - p[a];
+        VECTOR n = p[c] - p[a];
+        if (m.x * n.y - m.y * n.x >= 0) {
+            triangle3D(p[a], p[b], p[c], col * bright[a], col * bright[b], col * bright[c]);
+            triangle3D(p[c], p[b], p[d], col * bright[c], col * bright[b], col * bright[d]);
+        }
     }
     for (int i = 0; i < numAng - 2; i++) {
         int a = 0 + numAng*2;
@@ -76,5 +79,4 @@ void cylinder(const VECTOR& t, const COLOR& col, float s)
         //top
         triangle3D(p[a], p[b], p[c], col * bright[a], col * bright[b], col * bright[c]);
     }
-
 }

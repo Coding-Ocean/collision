@@ -2,7 +2,7 @@
 #include"graphic.h"
 #include"VECTOR.h"
 #include"mathUtil.h"
-static const int numAng = 40;//角数。偶数であること。
+static const int numAng = 6;//角数。偶数であること。
 static const int numVtx = numAng * (numAng / 2 - 1) + 2;//全頂点数
 static VECTOR op[numVtx];
 static float bright[numVtx];
