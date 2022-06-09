@@ -36,88 +36,48 @@ bool intersects(
 
     return false;
 }
-
-//解説用ベクトル表示バージョン
-bool intersects_(
+bool intersectsV2(
     const VECTOR& p, float radius, //球
     const VECTOR& sp, const VECTOR& ep, float segLen //線分
 )
 {
-    textSize(50);
-    static int sw = 6;
-    if (isTrigger(KEY_C)) { --sw; if (sw < 0)sw = 6; }
+    VECTOR sv = ep - sp;
+    /*
+    ２点sp,epを通る直線に点pから垂線を下した時の点mpを求める。
+    svの長さを１とした時の「spからmpまでの長さの割合」をtとする。
+    mp = sp + sv * t・・・t=0の時mp=sp、t=1の時mp=epになる
+    tを求めるための数学(内積の定数倍、分配法則)
+    dot(sv, p - mp) = 0
+    dot(sv, p - (sp + sv*t) ) = 0
+    dot(sv, p - sp - sv*t) = 0
+    dot(sv, p - sp) + dot(sv, -sv*t) = 0
+    dot(sv, -sv*t) = -dot(sv, p - sp)
+    t * dot(sv, -sv) = -dot(sv, p - sp)
+    t = -dot(sv, p - sp) / dot(sv, -sv)
+    t = -dot(sv, p - sp) / -dot(sv, sv)
+    t = dot(sv, p - sp) / dot(sv, sv)
+    t = dot(sv, p - sp) / |sv||sv|
+    */
+    //segLenはゼロにならないものとする
+    float t = dot(sv, p - sp) / (segLen * segLen);
+    VECTOR mp;
+    if (0.0f < t && t < 1.0f) {
+        mp = sp + sv * t;
+    }
+    else if (t <= 0.0f) {
+        mp = sp;
+    }
+    else {
+        mp = ep;
+    }
 
-    float radiusSq = radius * radius;
-    VECTOR pv;
-
-    //線分の終点から球体の中心点までのベクトル
-    pv = p - ep;
-    if (pv.magSq() < radiusSq) {
-        if (sw == 5) {
-            segment(ep, p, COLOR(255, 255, 0), 12);
-            fill(COLOR(255, 255, 0));
-            text("pv = p - ep;", 30, 80);
-        }
+    print((let)"t:"+t);
+    segment(mp, p, COLOR(255, 255, 0), 10);
+    //segment(sp + sv * t, p, COLOR(255, 0, 0), 10);
+    
+    if ((p - mp).magSq() < radius * radius) {
         return true;
     }
-
-    //線分の始点から球体の中心点までのベクトル
-    pv = p - sp;
-    if (pv.magSq() < radiusSq) {
-        if (sw == 5) {
-            segment(sp, p, COLOR(255, 255, 0), 12);
-            fill(COLOR(255, 255, 0));
-            text("pv = p - sp;", 30, 80);
-        }
-        return true;
-    }
-
-    //線分(始点から終点へ)の正規化ベクトル
-    VECTOR sv = (ep - sp).normalize();
-    //svとpv（始点から中心点までのベクトル)の内積
-    float d = dot(sv, pv);
-
-    //解説用ベクトル表示
-    {
-        text(sw == 5 ? "_" : "", 1900, 50);
-        switch (sw) {
-        case 0:
-        case 1:
-        case 2: //内積
-            fill(COLOR(255, 255, 255));
-            text((let)"d = dot(sv,pv); ⇒ " + d, 30, 200);
-        case 3: //線分正規化ベクトル
-            segment(sp, sp + sv, COLOR(0, 255, 255), 9);
-            fill(COLOR(0, 255, 255));
-            text("sv = (ep-sp).normalize();", 30, 140);
-        case 4: //始点⇒中心点
-            segment(sp, p, COLOR(0, 255, 0), 12);
-            fill(COLOR(0, 255, 0));
-            text("pv = p - sp;", 30, 80);
-        }
-    }
-    //内積の値が０より大きく、線分の大きさより小さいなら
-    if (0 < d && d < segLen) {
-        {
-            //解説用ベクトル表示
-            switch (sw) {
-            case 0://最短ベクトル
-                segment(sp + sv * d, p, COLOR(255, 255, 0), 12);
-                fill(255, 255, 0);
-                text("pv -= sv;", 30, 320);
-            case 1://正規化ベクトル＊内積
-                segment(sp, sp + sv * d, COLOR(255, 0, 255), 12);
-                fill(COLOR(255, 0, 255));
-                text("sv *= d;", 30, 260);
-            }
-        }
-        //svを長さdのベクトルにする
-        sv *= d;
-        //ベクトルの引き算でpvを「線分から球体の中心点までの最短ベクトル」に書き換える
-        pv -= sv;
-        if (pv.magSq() < radiusSq) return true;
-    }
-
     return false;
 }
 
@@ -205,7 +165,7 @@ void gmain() {
         }
         //当たり判定----------------------------------------------------------
         {
-            bool flag = intersects(p, radius, sp, ep, segLen);
+            bool flag = intersectsV2(p, radius, sp, ep, segLen);
             if (flag) sphColor = transRed;
             else sphColor = transWhite;
         }
