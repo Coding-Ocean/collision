@@ -81,12 +81,15 @@ float calcPointLineDist//最短距離
     float& t //ベクトル係数
 ) 
 {
+    //線分の長さ
     VECTOR sv = ep - sp;
     float segMagSq = sv.magSq();
+    //ベクトル係数
     t = 0.0f;
     if (segMagSq > 0.0f) {
         t = dot(sv, p - sp) / segMagSq;
     }
+    //垂線の端点
     h = sp + t * sv;
 
     //segment(p, h, COLOR(0, 255, 255), 10);
@@ -141,17 +144,17 @@ float calcLineLineDist
     VECTOR sv2 = ep2 - sp2;
 
     // 2直線が平行？
-    if (cross(sv1,sv2).magSq()< 0.000001f) {
+    //if (cross(sv1,sv2).magSq()< 0.000001f) {
 
-        //線分1の始点と直線2の最短距離の問題に帰着
-        float len = calcPointLineDist(sp1, sp2, ep2, p2, t2);
-        p1 = sp1;
-        t1 = 0.0f;
+    //    //線分1の始点と直線2の最短距離の問題に帰着
+    //    float len = calcPointLineDist(sp1, sp2, ep2, p2, t2);
+    //    p1 = sp1;
+    //    t1 = 0.0f;
 
-        return len;
-    }
+    //    return len;
+    //}
 
-    // 2直線はねじれ関係
+    // 2直線ねじれの関係
     float dsv1sv2 = dot(sv1, sv2);
     float sv1magSq = sv1.magSq();
     float sv2magSq = sv2.magSq();
@@ -233,7 +236,7 @@ float calcSegmentSegmentDist
         p1 = sp1;
         float len = calcPointSegmentDist(sp1, sp2, ep2, p2, t2);
         if (0.0f <= t2 && t2 <= 1.0f) {
-            segment(p1, p2, COLOR(255, 255, 0), 12);
+            segment(p1, p2, COLOR(255, 0, 255), 12);
 
             return len;
         }
@@ -254,10 +257,10 @@ float calcSegmentSegmentDist
     // 垂線の足が外にある事が判明
     // S1側のt1を0～1の間にクランプして垂線を降ろす
     clamp01(t1);
-    p1 = sp1 + t1 * sv1;
+    p1 = sp1 + sv1 * t1;
     float len = calcPointSegmentDist(p1, sp2, ep2, p2, t2);
     if (0.0f <= t2 && t2 <= 1.0f) {
-        segment(p1, p2, COLOR(255, 255, 0), 12);
+        segment(p1, p2, COLOR(255, 0, 0), 12);
         return len;
     }
 
@@ -266,14 +269,14 @@ float calcSegmentSegmentDist
     p2 = sp2 + sv2 * t2;
     len = calcPointSegmentDist(p2, sp1, ep1, p1, t1);
     if (0.0f <= t1 && t1 <= 1.0f) {
-        segment(p1, p2, COLOR(255, 255, 0), 12);
+        segment(p1, p2, COLOR(0, 255, 0), 12);
         return len;
     }
 
     // 双方の端点が最短と判明
     clamp01(t1);
     p1 = sp1 + sv1 * t1;
-    segment(p1, p2, COLOR(255, 255, 0), 12);
+    segment(p1, p2, COLOR(0, 0,255), 12);
     return (p2 - p1).mag();
 }
 
