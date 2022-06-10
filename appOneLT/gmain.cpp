@@ -4,74 +4,7 @@
 #include"axis.h"
 #include"segment.h"
 #include"point.h"
-#include"sphere.h"
-#include"cylinder.h"
-
-bool intersects(
-    const VECTOR& p, float radius,
-    const VECTOR& sp, const VECTOR& ep, float segLen
-) 
-{
-    VECTOR v(0, 1, 0);
-    float cylinderLen = 1.0f;
-    VECTOR sv = (ep - sp).normalize();
-    float radiusSq = radius * radius;
-
-    VECTOR pv;
-
-    VECTOR _cross = cross(v, sv);
-    float len = _cross.sqMag();
-    if (len < 0.000001f) {
-        //平行ベクトルのとき
-        VECTOR v_ = cross(sp - p, v);
-        //*n = p - P[i];
-        if (v_.magSq() < radiusSq) {
-            if (sv.y > 0) {
-                if (sp.y + segLen > p.y && sp.y < p.y + cylinderLen) {
-                    return true;
-                }
-            }
-            else {
-                if (sp.y > p.y && sp.y - segLen < p.y + cylinderLen) {
-                    return true;
-                }
-            }
-        }
-    }
-    else {
-        float dv = dot(v, sv);
-        float dA = dot(sp - p, v);
-        float dB = dot(sp - p, sv);
-        float lenA = (dA - dB * dv) / (1.0f - dv * dv);
-        float lenB = (dB - dA * dv) / (dv * dv - 1.0f);
-        VECTOR qA = p + v * lenA;
-        VECTOR qB = sp + sv * lenB;
-
-        segment(p, p + v * lenA, COLOR(255, 255, 0), 10);
-        segment(sp, sp + sv * lenB, COLOR(255, 0, 0), 8);
-        print(lenA);
-        print(lenB);
-        point(qA, COLOR(255, 255, 0), 20);
-        point(qB, COLOR(255, 0, 0), 20);
-        pv = qA - qB;
-        segment(qB, qA, COLOR(255, 0, 255), 10);
-
-        if (pv.magSq() < radiusSq) 
-        {
-            if (0 <= lenA && lenA <= cylinderLen) 
-            {
-                if (0 <= lenB && lenB <= segLen) 
-                {
-                    return true;
-                }
-            }
-        }
-    }
-
-    return false;
-}
-
-// 点と直線の最短距離
+//点と直線の最短距離
 float calcPointLineDist//最短距離
 (
     const VECTOR& p,//点 
@@ -87,12 +20,7 @@ float calcPointLineDist//最短距離
     if (segMagSq > 0.0f) {
         t = dot(sv, p - sp) / segMagSq;
     }
-    mp = sp + t * sv;
-
-    //segment(p, mp, COLOR(0, 255, 255), 10);
-    //なんちゃって直線を描画
-    //segment(sp - sv * 3, ep + sv * 3, COLOR(255, 255, 255), 10);
-    
+    mp = sp + sv * t;
     return (mp - p).mag();
 }
 // 点と線分の最短距離
@@ -103,25 +31,18 @@ float calcPointSegmentDist//最短距離
     const VECTOR& ep,//線分終点
     VECTOR& mp, //最短距離となる端点
     float& t //ベクトル係数
-) {
+) 
+{
     // 垂線の長さ、垂線の足の座標及びtを算出
     float len = calcPointLineDist(p, sp, ep, mp, t);
-
     if (t < 0.0f) {
-        //segment(sp, p, COLOR(255, 0, 0), 10);
-        
         mp = sp;
         return (p - sp).mag();
     }
     else if (t > 1.0f) {
-        //segment(ep, p, COLOR(255, 0, 0), 10);
-        
         mp = ep;
         return(p - ep).mag();
     }
-    
-    //segment(mp, p, COLOR(255, 0, 0), 10);
-    
     return len;
 }
 //直線と直線の最短距離
@@ -140,16 +61,14 @@ float calcLineLineDist
     VECTOR sv1 = ep1 - sp1;
     VECTOR sv2 = ep2 - sp2;
 
-    // 2直線が平行？
-    //if (cross(sv1,sv2).magSq()< 0.000001f) {
-
-    //    //線分1の始点と直線2の最短距離の問題に帰着
-    //    float len = calcPointLineDist(sp1, sp2, ep2, mp2, t2);
-    //    mp1 = sp1;
-    //    t1 = 0.0f;
-
-    //    return len;
-    //}
+    // 2直線が平行
+    if (cross(sv1,sv2).magSq()< 0.000001f) {
+        //線分1の始点と直線2の最短距離の問題に帰着
+        float len = calcPointLineDist(sp1, sp2, ep2, mp2, t2);
+        mp1 = sp1;
+        t1 = 0.0f;
+        return len;
+    }
 
     // 2直線はねじれ関係
     float dsv1sv2 = dot(sv1, sv2);
@@ -161,9 +80,6 @@ float calcLineLineDist
     mp1 = sp1 + sv1 * t1;
     t2 = dot(sv2, mp1 - sp2) / sv2magSq;
     mp2 = sp2 + sv2 * t2;
-
-    //segment(mp1, mp2, COLOR(255, 0, 255), 10);
-
     return (mp2 - mp1).mag();
 }
 
@@ -189,13 +105,14 @@ float calcSegmentSegmentDist
     VECTOR sv1 = ep1 - sp1;
     VECTOR sv2 = ep2 - sp2;
     float len = 0;
+
     /*
-    // S1が縮退している？
+    // sv1が縮退している？
     if (sv1.magSq() < 0.000001f) {
-        // S2も縮退？
+        // sv2も縮退？
         if (sv2.magSq() < 0.000001f) {
             // 点と点の距離の問題に帰着
-            float len = (sp2 - sp1).mag();
+            len = (sp2 - sp1).mag();
             mp1 = sp1;
             mp2 = sp2;
             t1 = t2 = 0.0f;
@@ -203,8 +120,8 @@ float calcSegmentSegmentDist
             return len;
         }
         else {
-            // S1の始点とS2の最短問題に帰着
-            float len = calcPointSegmentDist(sp1, sp2, ep2, mp2, t2);
+            // sp1とsv2の最短問題に帰着
+            len = calcPointSegmentDist(sp1, sp2, ep2, mp2, t2);
             mp1 = sp1;
             t1 = 0.0f;
             clamp01(t2);
@@ -212,10 +129,9 @@ float calcSegmentSegmentDist
             return len;
         }
     }
-
-    // S2が縮退している？
+    // sv2が縮退している？
     else if (sv2.magSq() < 0.000001f) {
-        // S2の始点とS1の最短問題に帰着
+        // sp2とsv1の最短問題に帰着
         float len = calcPointSegmentDist(sp2, sp1, ep1, mp1, t1);
         mp2 = sp2;
         clamp01(t1);
@@ -227,29 +143,15 @@ float calcSegmentSegmentDist
 
     /* 線分同士 */
 
-    // 2線分が平行だったら
-    if (cross(sv1, sv2).magSq() < 0.000001f) {
-        //sp1からsv2に垂線を下す
-        t1 = 0.0f;
-        mp1 = sp1;
-        len = calcPointSegmentDist(sp1, sp2, ep2, mp2, t2);
-        if (0.0f <= t2 && t2 <= 1.0f) {
-            segment(mp1, mp2, COLOR(255, 0, 0), 10);
-            return len;
-        }
-    }
-    else {
-        // 線分はねじれの関係
-        // 2直線間の最短距離を求めて仮のt1,t2を求める
-        len = calcLineLineDist(sp1, ep1, sp2, ep2, mp1, mp2, t1, t2);
-        if (0.0f <= t1 && t1 <= 1.0f &&
-            0.0f <= t2 && t2 <= 1.0f) {
-            segment(mp1, mp2, COLOR(255, 255, 0), 10);
-            return len;
-        }
+    // 2直線間の最短距離を求めて仮のt1,t2を求める
+    len = calcLineLineDist(sp1, ep1, sp2, ep2, mp1, mp2, t1, t2);
+    if (0.0f <= t1 && t1 <= 1.0f &&
+        0.0f <= t2 && t2 <= 1.0f) {
+        segment(mp1, mp2, COLOR(255, 255, 0), 10);
+        return len;
     }
 
-    // 垂線の足が外にある事が判明（平行でもこっちに来ることあるよ）
+    // 垂線の足が外にある事が判明（平行でもここに来ることあるよ）----------------
     // t2を0～1にクランプしてsv1に垂線を降ろす
     clamp01(t2);
     mp2 = sp2 + sv2 * t2;
@@ -279,8 +181,6 @@ void gmain() {
     hideCursor();
     createSegment();
     createPoint();
-    createCylinder();
-    createSphere();
     //-----------------------------------------------------------------------
     //線分１のオリジナルポジション
     VECTOR osp1(0, 0.4f, 0);//original start point
@@ -359,15 +259,15 @@ void gmain() {
         }
         //当たり判定----------------------------------------------------------
         {
-            VECTOR h1;
-            VECTOR h2;
+            VECTOR mp1;
+            VECTOR mp2;
             float t1;
             float t2;
             float dist = 0;
-            //dist = calcPointLineDist(sp1, sp2, ep2, h2, t2);
-            //dist = calcPointSegmentDist(sp1, sp2, ep2, h2, t2);
-            //dist = calcLineLineDist(sp1, ep1, sp2, ep2, h1, h2, t1, t2);
-            dist = calcSegmentSegmentDist(sp1, ep1, sp2, ep2, h1, h2, t1, t2);
+            //dist = calcPointLineDist(sp1, sp2, ep2, mp2, t2);
+            //dist = calcPointSegmentDist(sp1, sp2, ep2, mp2, t2);
+            //dist = calcLineLineDist(sp1, ep1, sp2, ep2, mp1, mp2, t1, t2);
+            dist = calcSegmentSegmentDist(sp1, ep1, sp2, ep2, mp1, mp2, t1, t2);
             print(dist);
             //if (flag) cylinderColor = transRed;
             //else cylinderColor = transWhite;
@@ -376,24 +276,18 @@ void gmain() {
         {
             //軸
             if(dispAxisFlag)axis(white, 1);
-            //線分
-            segment(sp2, ep2, white, 10);
-            //point(sp2, white, 10);
-            //point(ep2, white, 10);
-            //
-            segment(sp1, ep1, white, 10);
-            
-            //sphere(p, cylinderColor, radius);
-            //cylinder(p, cylinderColor, radius);
-            
+            //線分１
+            segment(sp1, ep1, white, 12);
+            //線分２
+            segment(sp2, ep2, white, 12);
             //テキスト情報
-            float size = 30;
-            textSize(size);
-            float colL = 10;//列の始まり
-            float rowH = size + 10;//行の高さ
-            int num = 0;//行番号
-            fill(COLOR(255, 255, 255));
-            text((let)"", colL, ++num * rowH);
+            //float size = 30;
+            //textSize(size);
+            //float colL = 10;//列の始まり
+            //float rowH = size + 10;//行の高さ
+            //int num = 0;//行番号
+            //fill(COLOR(255, 255, 255));
+            //text((let)"", colL, ++num * rowH);
         }
     }
 }
