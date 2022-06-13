@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="axis.cpp" />
+    <ClCompile Include="capsule.cpp" />
     <ClCompile Include="cylinder.cpp" />
     <ClCompile Include="gmain.cpp" />
     <ClCompile Include="input_.cpp" />
@@ -169,6 +170,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="axis.h" />
+    <ClInclude Include="capsule.h" />
     <ClInclude Include="cylinder.h" />
     <ClInclude Include="input_.h" />
     <ClInclude Include="point.h" />

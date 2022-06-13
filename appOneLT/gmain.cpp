@@ -4,10 +4,13 @@
 #include"axis.h"
 #include"segment.h"
 #include"point.h"
-struct SEGMENT {
-    VECTOR sp;
-    VECTOR ep;
-    VECTOR v;
+#include"capsule.h"
+//線分クラス(メンバデータはpublic)
+class SEGMENT {
+public:
+    VECTOR sp;//始点
+    VECTOR ep;//終点
+    VECTOR v;//始点から終点までのベクトル
     void set(const VECTOR& startPos, const VECTOR& endPos) 
     {
         sp = startPos; 
@@ -28,79 +31,89 @@ struct SEGMENT {
         segment(sp, ep, COLOR(255, 255, 255), 10);
     }
 };
+
 //点と直線の最短距離
-float calcPointLineDist//最短距離
+float calcPointLineDist //最短距離
 (
-    const VECTOR& p,//点 
-    const SEGMENT& s,
-    VECTOR& mp, //点から下ろした垂線の端点
+    const VECTOR& p, //点 
+    const SEGMENT& s, //線分（直線扱い）
+    VECTOR& mp, //点から直線に下ろした垂線の端点
     float& t //ベクトル係数
 ) 
 {
-    float segMagSq = s.v.magSq();
     t = 0.0f;
-    if (segMagSq > 0.0f) {
-        t = dot(s.v, p - s.sp) / segMagSq;
+    float dsvsv = s.v.magSq();//dot(s.v, s.v)と同じ
+    if (dsvsv > 0.0f) {
+        //tは「dotで投影した長さ÷s.vの長さ」つまり割合になる
+        t = dot(s.v, p - s.sp) / dsvsv;
     }
     mp = s.sp + s.v * t;
-    return (mp - p).mag();
+    return (p - mp).mag();
 }
-// 点と線分の最短距離
+
+//点と線分の最短距離
 float calcPointSegmentDist//最短距離
 (
     const VECTOR& p, //点
-    const SEGMENT& s,
-    VECTOR& mp, //最短距離となる端点
+    const SEGMENT& s, //線分
+    VECTOR& mp, //点から線分までの最短距離となる点(始点や終点になることもある)
     float& t //ベクトル係数
 ) 
 {
-    // 垂線の長さlen、垂線の足の座標mp及びtを算出
-    float len = calcPointLineDist(p, s, mp, t);
+    //とりあえず点から直線までの最短距離やmp,tを求めてみる
+    float dist = calcPointLineDist(p, s, mp, t);
+    //mpが線分の外にある(始点寄り)
     if (t < 0.0f) {
+        //点から線分の始点までの距離が最短
         mp = s.sp;
         return (p - mp).mag();
     }
+    //mpが線分の外にある(終点寄り)
     if (t > 1.0f) {
+        //点から線分の終点までの距離が最短
         mp = s.ep;
         return(p - mp).mag();
     }
-    return len;
+    //mpが線分内にある
+    //0 <= t <= 1
+    return dist;
 }
+
 //直線と直線の最短距離
 float calcLineLineDist
 (
-    const SEGMENT& s1,
-    const SEGMENT& s2,
-    VECTOR& mp1, 
+    const SEGMENT& s1,//直線１
+    const SEGMENT& s2,//直線２
+    VECTOR& mp1, //
     VECTOR& mp2,
     float& t1, 
     float& t2
 ) 
 {
-    // 2直線が平行
+    //2直線が平行
     if (cross(s1.v, s2.v).magSq() < 0.000001f) {
-        //線分1の始点と直線2の最短距離の問題に帰着
-        float len = calcPointLineDist(s1.sp, s2, mp2, t2);
+        //線分1の始点から直線2までの最短距離問題に帰着
+        float dist = calcPointLineDist(s1.sp, s2, mp2, t2);
         mp1 = s1.sp;
         t1 = 0.0f;
-        return len;
+        return dist;
     }
 
-    // 2直線はねじれ関係
-    float dsv1sv2 = dot(s1.v, s2.v);
-    float sv1magSq = s1.v.magSq();
-    float sv2magSq = s2.v.magSq();
-    VECTOR sp2sp1 = s1.sp - s2.sp;
-    t1 = (dsv1sv2 * dot(s2.v,sp2sp1) - sv2magSq * dot(s1.v,sp2sp1))
-        / (sv1magSq * sv2magSq - dsv1sv2 * dsv1sv2);
+    //2直線がねじれ関係
+    float dv1v2 = dot(s1.v, s2.v);
+    float dv1v1 = s1.v.magSq();//dot(s1.v,s1v)と同じ
+    float dv2v2 = s2.v.magSq();//dot(s2.v,s2v)と同じ
+    VECTOR vp2p1 = s1.sp - s2.sp;
+    t1 = (dv1v2 * dot(s2.v,vp2p1) - dv2v2 * dot(s1.v,vp2p1))
+        / (dv1v1 * dv2v2 - dv1v2 * dv1v2);
     mp1 = s1.sp + s1.v * t1;
-    t2 = dot(s2.v, mp1 - s2.sp) / sv2magSq;
+    t2 = dot(s2.v, mp1 - s2.sp) / dv2v2;
     mp2 = s2.sp + s2.v * t2;
     return (mp2 - mp1).mag();
 }
 
-// 0～1の間にクランプ
-void clamp01(float& v) {
+// 0～1の間にクランプ(値を強制的にある範囲内にすること)
+void clamp0to1(float& v) {
     if (v < 0.0f)
         v = 0.0f;
     else if (v > 1.0f)
@@ -109,14 +122,14 @@ void clamp01(float& v) {
 // 2線分の最短距離
 float calcSegmentSegmentDist
 (
-    const SEGMENT& s1,
-    const SEGMENT& s2,
-    VECTOR& mp1, 
-    VECTOR& mp2, 
-    float& t1, 
-    float& t2
+    const SEGMENT& s1,//線分1
+    const SEGMENT& s2,//線分2
+    VECTOR& mp1, //垂線の端点1
+    VECTOR& mp2, //垂線の端点2
+    float& t1, //ベクトル係数1
+    float& t2  //ベクトル係数2
 ) {
-    float len = 0;
+    float dist = 0;
 
     /*
     // sv1が縮退している？
@@ -124,67 +137,70 @@ float calcSegmentSegmentDist
         // sv2も縮退？
         if (sv2.magSq() < 0.000001f) {
             // 点と点の距離の問題に帰着
-            len = (sp2 - sp1).mag();
+            dist = (sp2 - sp1).mag();
             mp1 = sp1;
             mp2 = sp2;
             t1 = t2 = 0.0f;
             segment(mp1, mp2, COLOR(255, 255, 255), 10);
-            return len;
+            return dist;
         }
         else {
             // sp1とsv2の最短問題に帰着
-            len = calcPointSegmentDist(sp1, sp2, ep2, mp2, t2);
+            dist = calcPointSegmentDist(sp1, sp2, ep2, mp2, t2);
             mp1 = sp1;
             t1 = 0.0f;
             clamp01(t2);
             segment(mp1, mp2, COLOR(255, 255, 255), 10);
-            return len;
+            return dist;
         }
     }
     // sv2が縮退している？
     else if (sv2.magSq() < 0.000001f) {
         // sp2とsv1の最短問題に帰着
-        float len = calcPointSegmentDist(sp2, sp1, ep1, mp1, t1);
+        float dist = calcPointSegmentDist(sp2, sp1, ep1, mp1, t1);
         mp2 = sp2;
         clamp01(t1);
         t2 = 0.0f;
         segment(mp1, mp2, COLOR(255, 255, 255), 10);
-        return len;
+        return dist;
     }
     */
 
-    /* 線分同士 */
-
-    // 2直線間の最短距離を求めて仮のt1,t2を求める
-    len = calcLineLineDist(s1, s2, mp1, mp2, t1, t2);
+    //とりあえず2直線間の最短距離,mp1,mp2,t1,t2を求めてみる
+    dist = calcLineLineDist(s1, s2, mp1, mp2, t1, t2);
     if (0.0f <= t1 && t1 <= 1.0f &&
         0.0f <= t2 && t2 <= 1.0f) {
+        //mp1,mp2が両方とも線分内にあった
         segment(mp1, mp2, COLOR(255, 255, 0), 10);
-        return len;
+        return dist;
     }
 
-    // 垂線の足が外にある事が判明（平行でもここに来ることあるよ）----------------
-    // t2を0～1にクランプしてsv1に垂線を降ろす
-    clamp01(t2);
+    // 垂線の端点が線分の外にある事が判明（平行でもここに来ることあるよ）----------------
+    // t2を0～1にクランプしてmp2からs1.vに垂線を降ろしてみる
+    clamp0to1(t2);
     mp2 = s2.sp + s2.v * t2;
-    len = calcPointSegmentDist(mp2, s1, mp1, t1);
+    dist = calcPointSegmentDist(mp2, s1, mp1, t1);
     if (0.0f <= t1 && t1 <= 1.0f) {
-        segment(mp1, mp2, COLOR(0, 0, 255), 10);
-        return len;
+        //mp1が線分内にあった
+        segment(mp1, mp2, COLOR(255, 0, 0), 10);
+        point(mp2, COLOR(255, 0, 0), 40);
+        return dist;
     }
-    // t1を0～1にクランプしてsv2に垂線を降ろす
-    clamp01(t1);
+    // t1を0～1にクランプしてmp1からs2.vに垂線を降ろしてみる
+    clamp0to1(t1);
     mp1 = s1.sp + s1.v * t1;
-    len = calcPointSegmentDist(mp1, s2, mp2, t2);
+    dist = calcPointSegmentDist(mp1, s2, mp2, t2);
     if (0.0f <= t2 && t2 <= 1.0f) {
+        //mp2が線分内にあった
         segment(mp1, mp2, COLOR(0, 255, 0), 10);
-        return len;
+        point(mp1, COLOR(0, 255, 0), 40);
+        return dist;
     }
 
     // 双方の端点が最短と判明-----------------------------------------------
-    clamp01(t1);
-    mp1 = s1.sp + s1.v * t1;
-    segment(mp1, mp2, COLOR(255, 0, 255), 10);
+    //clamp0to1(t1);
+    //mp1 = s1.sp + s1.v * t1;
+    segment(mp1, mp2, COLOR(0, 255, 255), 10);
     return (mp2 - mp1).mag();
 }
 
@@ -193,6 +209,7 @@ void gmain() {
     hideCursor();
     createSegment();
     createPoint();
+    createCapsule();
     //-----------------------------------------------------------------------
     //線分１のオリジナルポジション
     VECTOR osp1(0, 0.4f, 0);//original start point
@@ -221,7 +238,7 @@ void gmain() {
     COLOR white(220, 220, 220);
     COLOR transRed(255, 0, 0, 150);
     COLOR transWhite(255, 255, 255,180);
-    COLOR cylinderColor = transWhite;
+    COLOR capsuleColor = transWhite;
     //プロジェクション行列を作っておく
     createProj();
     //デルタタイム初期化
@@ -231,7 +248,7 @@ void gmain() {
         //デルタタイム設定
         setDeltaTime();
         //更新中のデータを表示するため、ここでクリア
-        clear(30,80,180);
+        clear(180,180,60);
         //カメラ行列を更新
         updateView();
         //表示切替、操作オブジェクト切り替え--------------------------------------
@@ -271,8 +288,8 @@ void gmain() {
             //dist = calcLineLineDist(sp1, ep1, sp2, ep2, mp1, mp2, t1, t2);
             dist = calcSegmentSegmentDist(s1, s2, mp1, mp2, t1, t2);
             print(dist);
-            //if (flag) cylinderColor = transRed;
-            //else cylinderColor = transWhite;
+            if (dist<0.2f) capsuleColor = transRed;
+            else capsuleColor = transWhite;
         }
         //描画----------------------------------------------------------------
         {
@@ -282,6 +299,9 @@ void gmain() {
             s1.draw();
             //線分２
             s2.draw();
+            //カプセル
+            capsule(VECTOR(0,0,0),capsuleColor);
+
             //テキスト情報
             //float size = 30;
             //textSize(size);

@@ -3,7 +3,7 @@
 #include"VECTOR.h"
 #include"mathUtil.h"
 #include"point.h"
-static const int numAng = 4;//角数。偶数であること。
+static const int numAng = 6;//角数。偶数であること。
 static const int numVtx = numAng * (numAng / 2 + 1);//全頂点数
 static float radius = 0.0005f;
 static VECTOR op[numVtx];

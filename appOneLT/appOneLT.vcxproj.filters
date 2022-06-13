@@ -18,6 +18,7 @@
     <ClCompile Include="cylinder.cpp" />
     <ClCompile Include="TRIANGLE.cpp" />
     <ClCompile Include="input_.cpp" />
+    <ClCompile Include="capsule.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc">
@@ -40,5 +41,6 @@
     <ClInclude Include="cylinder.h" />
     <ClInclude Include="TRIANGLE.h" />
     <ClInclude Include="input_.h" />
+    <ClInclude Include="capsule.h" />
   </ItemGroup>
 </Project>
