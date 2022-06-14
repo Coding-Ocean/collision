@@ -1,3 +1,4 @@
 #pragma once
 void createCapsule();
-void capsule(const class VECTOR& t, const struct COLOR& col);
+void capsule(const VECTOR& t, const VECTOR& r,
+    const COLOR& col, float halfH, float radius);

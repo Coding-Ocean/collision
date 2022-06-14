@@ -84,10 +84,10 @@ float calcLineLineDist
 (
     const SEGMENT& s1,//直線１
     const SEGMENT& s2,//直線２
-    VECTOR& mp1, //
-    VECTOR& mp2,
-    float& t1, 
-    float& t2
+    VECTOR& mp1, //最短線の端点１
+    VECTOR& mp2, //最短線の端点２
+    float& t1, //ベクトル係数１
+    float& t2  //ベクトル係数２
 ) 
 {
     //2直線が平行
@@ -119,6 +119,7 @@ void clamp0to1(float& v) {
     else if (v > 1.0f)
         v = 1.0f;
 }
+
 // 2線分の最短距離
 float calcSegmentSegmentDist
 (
@@ -128,7 +129,8 @@ float calcSegmentSegmentDist
     VECTOR& mp2, //垂線の端点2
     float& t1, //ベクトル係数1
     float& t2  //ベクトル係数2
-) {
+) 
+{
     float dist = 0;
 
     /*
@@ -171,7 +173,9 @@ float calcSegmentSegmentDist
     if (0.0f <= t1 && t1 <= 1.0f &&
         0.0f <= t2 && t2 <= 1.0f) {
         //mp1,mp2が両方とも線分内にあった
+#ifdef _DEBUG
         segment(mp1, mp2, COLOR(255, 255, 0), 10);
+#endif
         return dist;
     }
 
@@ -182,8 +186,10 @@ float calcSegmentSegmentDist
     dist = calcPointSegmentDist(mp2, s1, mp1, t1);
     if (0.0f <= t1 && t1 <= 1.0f) {
         //mp1が線分内にあった
+#ifdef _DEBUG
         segment(mp1, mp2, COLOR(255, 0, 0), 10);
         point(mp2, COLOR(255, 0, 0), 40);
+#endif
         return dist;
     }
     // t1を0～1にクランプしてmp1からs2.vに垂線を降ろしてみる
@@ -192,15 +198,17 @@ float calcSegmentSegmentDist
     dist = calcPointSegmentDist(mp1, s2, mp2, t2);
     if (0.0f <= t2 && t2 <= 1.0f) {
         //mp2が線分内にあった
+#ifdef _DEBUG
         segment(mp1, mp2, COLOR(0, 255, 0), 10);
         point(mp1, COLOR(0, 255, 0), 40);
+#endif
         return dist;
     }
 
     // 双方の端点が最短と判明-----------------------------------------------
-    //clamp0to1(t1);
-    //mp1 = s1.sp + s1.v * t1;
+#ifdef _DEBUG
     segment(mp1, mp2, COLOR(0, 255, 255), 10);
+#endif
     return (mp2 - mp1).mag();
 }
 
@@ -211,6 +219,8 @@ void gmain() {
     createPoint();
     createCapsule();
     //-----------------------------------------------------------------------
+    //カプセル1半径
+    float radius1 = 0.2f;
     //線分１のオリジナルポジション
     VECTOR osp1(0, 0.4f, 0);//original start point
     VECTOR oep1(0, -0.4f, 0);//original end point
@@ -219,9 +229,11 @@ void gmain() {
     VECTOR seg1Tran(0.0f, 0.0f, 0.0f);
     VECTOR seg1Rot;
     //-----------------------------------------------------------------------
+    //カプセル2半径
+    float radius2 = 0.05f;
     //線分2のオリジナルポジション
-    VECTOR osp2(0, 0.4f, 0);//original start point
-    VECTOR oep2(0, -0.4f, 0);//original end point
+    VECTOR osp2(0, 0.3f, 0);//original start point
+    VECTOR oep2(0, -0.3f, 0);//original end point
     //線分2の座標変換後のポジション
     SEGMENT s2;
     VECTOR seg2Tran(0.5f, 0.0f, 0.0f);//セグメントの移動用 segment translate
@@ -283,24 +295,31 @@ void gmain() {
             float t1;
             float t2;
             float dist = 0;
-            //dist = calcPointLineDist(sp1, sp2, ep2, mp2, t2);
-            //dist = calcPointSegmentDist(sp1, sp2, ep2, mp2, t2);
-            //dist = calcLineLineDist(sp1, ep1, sp2, ep2, mp1, mp2, t1, t2);
+            //dist = calcPointLineDist(s2.sp, s1,  mp1, t1);
+            //point(s2.sp, COLOR(255, 255, 0), 40);
+            //segment(s2.sp, mp1, COLOR(255, 255, 0), 10);
+            //dist = calcPointSegmentDist(s2.sp, s1, mp1, t1);
+            //dist = calcLineLineDist(s1, s2, mp1, mp2, t1, t2);
+            //segment(mp2, mp1, COLOR(255, 255, 0), 10);
             dist = calcSegmentSegmentDist(s1, s2, mp1, mp2, t1, t2);
             print(dist);
-            if (dist<0.2f) capsuleColor = transRed;
+            if (dist < radius1+radius2) capsuleColor = transRed;
             else capsuleColor = transWhite;
         }
         //描画----------------------------------------------------------------
         {
             //軸
             if(dispAxisFlag)axis(white, 1);
+#ifdef _DEBUG
+
             //線分１
             s1.draw();
             //線分２
             s2.draw();
+#endif
             //カプセル
-            capsule(VECTOR(0,0,0),capsuleColor);
+            capsule(seg2Tran, seg2Rot, capsuleColor, osp2.y, radius2);
+            capsule(seg1Tran, seg1Rot, capsuleColor, osp1.y, radius1);
 
             //テキスト情報
             //float size = 30;
