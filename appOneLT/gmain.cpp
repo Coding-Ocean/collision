@@ -5,19 +5,15 @@
 #include"segment.h"
 #include"point.h"
 #include"capsule.h"
+#include"sphere.h"
 //線分クラス(メンバデータはpublic)
 class SEGMENT {
 public:
     VECTOR sp;//始点
     VECTOR ep;//終点
     VECTOR v;//始点から終点までのベクトル
-    void set(const VECTOR& startPos, const VECTOR& endPos) 
-    {
-        sp = startPos; 
-        ep = endPos;
-        v = ep - sp;
-    }
-    void set(const VECTOR& tran, const VECTOR& rot,const VECTOR& osp, const VECTOR& oep) 
+    void update(const VECTOR& tran, const VECTOR& rot,
+        const VECTOR& osp, const VECTOR& oep) 
     {
         gWorld.identity();
         gWorld.mulTranslate(tran);
@@ -42,10 +38,14 @@ float calcPointLineDist //最短距離
 ) 
 {
     t = 0.0f;
-    float dsvsv = s.v.magSq();//dot(s.v, s.v)と同じ
-    if (dsvsv > 0.0f) {
-        //tは「dotで投影した長さ÷s.vの長さ」つまり割合になる
-        t = dot(s.v, p - s.sp) / dsvsv;
+    float dvv = s.v.magSq();//dot(s.v, s.v)と同じ
+    if (dvv > 0.0f) {
+        t = dot(s.v, p - s.sp) / dvv;
+        // 上の式の説明
+        // dot(s.v, p-s.sp) は |s.v||p-s.sp|cosΘ
+        // dvvは|s.v|の２乗
+        // 上の計算で、tは |p-s.sp|cosΘ / |s.v|となる。
+        // つまりtは「dotで投影した長さ÷s.vの長さ」という割合になる
     }
     mp = s.sp + s.v * t;
     return (p - mp).mag();
@@ -88,36 +88,71 @@ float calcLineLineDist
     VECTOR& mp2, //最短線の端点２
     float& t1, //ベクトル係数１
     float& t2  //ベクトル係数２
-) 
+)
 {
     //2直線が平行
     if (cross(s1.v, s2.v).magSq() < 0.000001f) {
-        //線分1の始点から直線2までの最短距離問題に帰着
+        //線分1の始点から直線2までの最短距離問題に帰着する
         float dist = calcPointLineDist(s1.sp, s2, mp2, t2);
         mp1 = s1.sp;
         t1 = 0.0f;
         return dist;
     }
 
-    //2直線がねじれ関係
+    //2直線が平行でない
+    //t1を求める式の詳細は下のコメントにある
     float dv1v2 = dot(s1.v, s2.v);
-    float dv1v1 = s1.v.magSq();//dot(s1.v,s1v)と同じ
-    float dv2v2 = s2.v.magSq();//dot(s2.v,s2v)と同じ
+    float dv1v1 = s1.v.magSq();//dot(s1.v,s1.v)と同じ
+    float dv2v2 = s2.v.magSq();//dot(s2.v,s2.v)と同じ
     VECTOR vp2p1 = s1.sp - s2.sp;
-    t1 = (dv1v2 * dot(s2.v,vp2p1) - dv2v2 * dot(s1.v,vp2p1))
+    t1 = (dv1v2 * dot(s2.v, vp2p1) - dv2v2 * dot(s1.v, vp2p1))
         / (dv1v1 * dv2v2 - dv1v2 * dv1v2);
     mp1 = s1.sp + s1.v * t1;
     t2 = dot(s2.v, mp1 - s2.sp) / dv2v2;
     mp2 = s2.sp + s2.v * t2;
     return (mp2 - mp1).mag();
+
+    /*
+    両直線の最短距離を結ぶ線は、両直線に共通の垂線となる。。。その垂線の端点mp1,mp2
+    mp1 = s1.sp + s1.v * t1
+    mp2 = s2.sp + s2.v * t2
+
+    t2を求める式
+    t2 = dot(s2.v,mp1 - s2.sp) / dot(s2.v,s2.v)
+    mp1を置き換えると、t2はt1で表現できる
+    t2 = dot(s2.v, sp1.sp + s1.v * t1 - s2.sp) / dot(s2.v, s2.v)
+
+    次の式からt1を導く。バカ丁寧に変形していきます。
+    0 = dot(s1.v,mp1-mp2)
+    =dot(s1.v,(s1.sp+s1.v*t1)-(s2.sp+s2.v*t2))
+    =dot(s1.v, s1.sp-s2.sp + s1.v*t1 - s2.v*t2)
+    分配
+    =dot(s1.v, s1.sp-s2.sp) + dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v)*t2)
+    t2を消す
+    =dot(s1.v, s1.sp-s2.sp) + dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v) * dot(s2.v, sp1.sp + s1.v * t1 - s2.sp) / dot(s2.v,s2.v)
+    　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　             ↓入れ替え
+    =dot(s1.v, s1.sp-s2.sp) + dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp + s1.v * t1) / dot(s2.v,s2.v)
+    一番右の分母を消す
+    =dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp) + dot(s2.v,s2.v)*dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp + s1.v * t1)
+    一番右を分配してtを出す
+    =dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp) + dot(s2.v,s2.v)*dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v) * [dot(s2.v, sp1.sp - s2.sp) + dot(s2.v,s1.v) * t1]
+    大かっこを消す
+    =dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp) + dot(s2.v,s2.v)*dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp) - dot(s1.v,s2.v) * dot(s2.v,s1.v) * t1
+    t1でくくる
+    =dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp)  - dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp) + [dot(s2.v,s2.v)*dot(s1.v,s1.v) - dot(s1.v,s2.v) * dot(s2.v,s1.v) ]* t1
+    移項
+    -[dot(s2.v,s2.v)*dot(s1.v,s1.v) - dot(s1.v,s2.v) * dot(s2.v,s1.v) ]*t1=dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp)  - dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp)
+    t1=にして整理していく
+    t1=dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp)  - dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp) / - [dot(s2.v,s2.v)*dot(s1.v,s1.v) - dot(s1.v,s2.v) * dot(s2.v,s1.v) ]
+    t1=-dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp)  + dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp) / dot(s2.v,s2.v)*dot(s1.v,s1.v) - dot(s1.v,s2.v) * dot(s2.v,s1.v)
+    t1=dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp) -　dot(s2.v,s2.v) * dot(s1.v, s1.sp-s2.sp)  / dot(s1.v,s1.v) * dot(s2.v,s2.v) - dot(s1.v,s2.v) * dot(s1.v,s2.v)
+    */
 }
 
 // 0～1の間にクランプ(値を強制的にある範囲内にすること)
 void clamp0to1(float& v) {
-    if (v < 0.0f)
-        v = 0.0f;
-    else if (v > 1.0f)
-        v = 1.0f;
+    if (v < 0.0f)  v = 0.0f;
+    else if (v > 1.0f)  v = 1.0f;
 }
 
 // 2線分の最短距離
@@ -218,26 +253,30 @@ void gmain() {
     createSegment();
     createPoint();
     createCapsule();
+    createSphere();
     //-----------------------------------------------------------------------
     //カプセル1半径
     float radius1 = 0.2f;
     //線分１のオリジナルポジション
     VECTOR osp1(0, 0.4f, 0);//original start point
     VECTOR oep1(0, -0.4f, 0);//original end point
-    //線分１の座用変換後のポジション
+    //線分１座標変換用データ
+    VECTOR seg1Tran(0.0f, 0.0f, 0.0f);//セグメントの移動用 segment translate
+    VECTOR seg1Rot;//セグメントの回転用 segment rotate
+    //線分１(座用変換後の値をこれにセットする)
     SEGMENT s1;
-    VECTOR seg1Tran(0.0f, 0.0f, 0.0f);
-    VECTOR seg1Rot;
     //-----------------------------------------------------------------------
     //カプセル2半径
-    float radius2 = 0.05f;
+    float radius2 = 0.1f;
     //線分2のオリジナルポジション
-    VECTOR osp2(0, 0.3f, 0);//original start point
-    VECTOR oep2(0, -0.3f, 0);//original end point
-    //線分2の座標変換後のポジション
-    SEGMENT s2;
+    VECTOR osp2(0, 0.4f, 0);//original start point
+    VECTOR oep2(0, -0.4f, 0);//original end point
+    //線分１座標変換用データ
     VECTOR seg2Tran(0.5f, 0.0f, 0.0f);//セグメントの移動用 segment translate
     VECTOR seg2Rot;//セグメントの回転用 segment rotate
+    //線分１(座用変換後の値をこれにセットする)
+    SEGMENT s2;
+    //-----------------------------------------------------------
     //移動回転スピード
     MATRIX world;
     float speed = 0.3f;
@@ -247,10 +286,11 @@ void gmain() {
     int operateObjSw = 0;
     //その他------------------------------------------------------------------
     //色
-    COLOR white(220, 220, 220);
-    COLOR transRed(255, 0, 0, 150);
-    COLOR transWhite(255, 255, 255,180);
-    COLOR capsuleColor = transWhite;
+    COLOR white(255, 255, 255);
+    COLOR yellow(255, 255, 0);
+    COLOR colColor(255, 0, 0, 110);
+    COLOR noColColor(255, 255, 255, 100);
+    COLOR capsuleColor = noColColor;
     //プロジェクション行列を作っておく
     createProj();
     //デルタタイム初期化
@@ -260,18 +300,16 @@ void gmain() {
         //デルタタイム設定
         setDeltaTime();
         //更新中のデータを表示するため、ここでクリア
-        clear(180,180,60);
+        clear(60,120,240);
         //カメラ行列を更新
         updateView();
-        //表示切替、操作オブジェクト切り替え--------------------------------------
+        //表示切替、操作オブジェクト切り替え、トランスフォームリセット----------------
         {
             if (isTrigger(KEY_X)) { dispAxisFlag = !dispAxisFlag; }
             if (isTrigger(KEY_Z)) { operateObjSw = 1 - operateObjSw; }
             if (isTrigger(KEY_R)) {
-                seg2Tran.set(0.5f, 0.0f, 0.0f);
-                seg2Rot.set(0, 0, 0);
-                seg1Tran.set(0, 0, 0);
-                seg1Rot.set(0, 0, 0);
+                seg1Tran.set(0, 0, 0); seg1Rot.set(0, 0, 0);
+                seg2Tran.set(0.5f, 0.0f, 0.0f); seg2Rot.set(0, 0, 0);
             }
         }
         //線分1を動かす-----------------------------------------------------------
@@ -279,14 +317,14 @@ void gmain() {
             if (operateObjSw == 1) {
                 input(seg1Tran, seg1Rot, speed*delta);
             }
-            s1.set(seg1Tran, seg1Rot, osp1, oep1);
+            s1.update(seg1Tran, seg1Rot, osp1, oep1);
         }
         //線分2を動かす---------------------------------------------------------
         {
             if (operateObjSw == 0) {
                 input(seg2Tran, seg2Rot, speed*delta);
             }
-            s2.set(seg2Tran, seg2Rot, osp2, oep2);
+            s2.update(seg2Tran, seg2Rot, osp2, oep2);
         }
         //当たり判定----------------------------------------------------------
         {
@@ -296,22 +334,25 @@ void gmain() {
             float t2;
             float dist = 0;
             //dist = calcPointLineDist(s2.sp, s1,  mp1, t1);
-            //point(s2.sp, COLOR(255, 255, 0), 40);
-            //segment(s2.sp, mp1, COLOR(255, 255, 0), 10);
+            //sphere(s2.sp, white, 0.02f);
+            //segment(s2.sp, mp1, yellow, 10);
             //dist = calcPointSegmentDist(s2.sp, s1, mp1, t1);
+            //sphere(s2.sp, white, 0.02f);
+            //segment(s2.sp, mp1, yellow, 10);
             //dist = calcLineLineDist(s1, s2, mp1, mp2, t1, t2);
-            //segment(mp2, mp1, COLOR(255, 255, 0), 10);
+            //segment(mp2, mp1, yellow, 10);
+            //sphere(mp1, yellow, 0.015f);
+            //sphere(mp2, yellow, 0.015f);
             dist = calcSegmentSegmentDist(s1, s2, mp1, mp2, t1, t2);
             print(dist);
-            if (dist < radius1+radius2) capsuleColor = transRed;
-            else capsuleColor = transWhite;
+            if (dist < radius1+radius2) capsuleColor = colColor;
+            else capsuleColor = noColColor;
         }
         //描画----------------------------------------------------------------
         {
             //軸
             if(dispAxisFlag)axis(white, 1);
 #ifdef _DEBUG
-
             //線分１
             s1.draw();
             //線分２
@@ -327,7 +368,7 @@ void gmain() {
             //float colL = 10;//列の始まり
             //float rowH = size + 10;//行の高さ
             //int num = 0;//行番号
-            //fill(COLOR(255, 255, 255));
+            //fill(255);
             //text((let)"", colL, ++num * rowH);
         }
     }
