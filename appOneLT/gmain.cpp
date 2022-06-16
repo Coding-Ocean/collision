@@ -164,6 +164,84 @@ float calcSegmentSegmentDist
     VECTOR& mp2, //垂線の端点2
     float& t1, //ベクトル係数1
     float& t2  //ベクトル係数2
+)
+{
+    float dist = 0;
+
+    /*
+    // sv1が縮退している？
+    if (sv1.magSq() < 0.000001f) {
+        // sv2も縮退？
+        if (sv2.magSq() < 0.000001f) {
+            // 点と点の距離の問題に帰着
+            dist = (sp2 - sp1).mag();
+            mp1 = sp1;
+            mp2 = sp2;
+            t1 = t2 = 0.0f;
+            segment(mp1, mp2, COLOR(255, 255, 255), 10);
+            return dist;
+        }
+        else {
+            // sp1とsv2の最短問題に帰着
+            dist = calcPointSegmentDist(sp1, sp2, ep2, mp2, t2);
+            mp1 = sp1;
+            t1 = 0.0f;
+            clamp01(t2);
+            segment(mp1, mp2, COLOR(255, 255, 255), 10);
+            return dist;
+        }
+    }
+    // sv2が縮退している？
+    else if (sv2.magSq() < 0.000001f) {
+        // sp2とsv1の最短問題に帰着
+        float dist = calcPointSegmentDist(sp2, sp1, ep1, mp1, t1);
+        mp2 = sp2;
+        clamp01(t1);
+        t2 = 0.0f;
+        segment(mp1, mp2, COLOR(255, 255, 255), 10);
+        return dist;
+    }
+    */
+
+    //とりあえず2直線間の最短距離,mp1,mp2,t1,t2を求めてみる
+    dist = calcLineLineDist(s1, s2, mp1, mp2, t1, t2);
+    if (0.0f <= t1 && t1 <= 1.0f &&
+        0.0f <= t2 && t2 <= 1.0f) {
+        //mp1,mp2が両方とも線分内にあった
+        return dist;
+    }
+    
+    // 垂線の端点が線分の外にある事が判明（平行でもここに来ることあるよ）----------
+    // t1を求める ⇒ t2を0～1にクランプしてmp2からs1.vに垂線を降ろしてみる
+    clamp0to1(t2);
+    mp2 = s2.sp + s2.v * t2;
+    dist = calcPointSegmentDist(mp2, s1, mp1, t1);
+    if (0.0f <= t1 && t1 <= 1.0f) {
+        //mp1が線分内にあった
+        return dist;
+    }
+    // t2を求める ⇒ t1を0～1にクランプしてmp1からs2.vに垂線を降ろしてみる
+    clamp0to1(t1);
+    mp1 = s1.sp + s1.v * t1;
+    dist = calcPointSegmentDist(mp1, s2, mp2, t2);
+    if (0.0f <= t2 && t2 <= 1.0f) {
+        //mp2が線分内にあった
+        return dist;
+    }
+
+    // 双方の端点が最短と判明-----------------------------------------------
+    return (mp2 - mp1).mag();
+}
+
+//補助線バージョン
+float calcSegmentSegmentDist_
+(
+    const SEGMENT& s1,//線分1
+    const SEGMENT& s2,//線分2
+    VECTOR& mp1, //垂線の端点1
+    VECTOR& mp2, //垂線の端点2
+    float& t1, //ベクトル係数1
+    float& t2  //ベクトル係数2
 ) 
 {
     float dist = 0;
@@ -208,42 +286,45 @@ float calcSegmentSegmentDist
     if (0.0f <= t1 && t1 <= 1.0f &&
         0.0f <= t2 && t2 <= 1.0f) {
         //mp1,mp2が両方とも線分内にあった
-#ifdef _DEBUG
         segment(mp1, mp2, COLOR(255, 255, 0), 10);
-#endif
         return dist;
     }
+    print((let)"after LL " + t1 + " " + t2);
 
     // 垂線の端点が線分の外にある事が判明（平行でもここに来ることあるよ）----------------
-    // t2を0～1にクランプしてmp2からs1.vに垂線を降ろしてみる
+
+    // t1を求める ⇒ t2を0～1にクランプしてmp2からs1.vに垂線を降ろしてみる
     clamp0to1(t2);
     mp2 = s2.sp + s2.v * t2;
     dist = calcPointSegmentDist(mp2, s1, mp1, t1);
     if (0.0f <= t1 && t1 <= 1.0f) {
         //mp1が線分内にあった
-#ifdef _DEBUG
+        print((let)"PS1 " + t1 + " " + t2);
+        point(mp1, COLOR(255, 0, 0), 40);
         segment(mp1, mp2, COLOR(255, 0, 0), 10);
-        point(mp2, COLOR(255, 0, 0), 40);
-#endif
         return dist;
     }
-    // t1を0～1にクランプしてmp1からs2.vに垂線を降ろしてみる
+    print((let)"after PS1 " + t1 + " " + t2);
+    segment(s1.sp+s1.v*t1, mp2, COLOR(255, 0,0), 2);
+    point(s1.sp + s1.v * t1, COLOR(255, 0, 0), 12);
+
+    // t2を求める ⇒ t1を0～1にクランプしてmp1からs2.vに垂線を降ろしてみる
     clamp0to1(t1);
     mp1 = s1.sp + s1.v * t1;
     dist = calcPointSegmentDist(mp1, s2, mp2, t2);
     if (0.0f <= t2 && t2 <= 1.0f) {
         //mp2が線分内にあった
-#ifdef _DEBUG
+        print((let)"PS2 " + t1 + " " + t2);
         segment(mp1, mp2, COLOR(0, 255, 0), 10);
-        point(mp1, COLOR(0, 255, 0), 40);
-#endif
+        point(mp2, COLOR(0, 255, 0), 40);
         return dist;
     }
+    print((let)"after PS2 " + t1 + " " + t2);
+    segment(mp1, s2.sp + s2.v * t2, COLOR(0, 255, 0), 2);
+    point(s2.sp + s2.v * t2, COLOR(0,255, 0), 12);
 
     // 双方の端点が最短と判明-----------------------------------------------
-#ifdef _DEBUG
     segment(mp1, mp2, COLOR(0, 255, 255), 10);
-#endif
     return (mp2 - mp1).mag();
 }
 
@@ -258,8 +339,8 @@ void gmain() {
     //カプセル1半径
     float radius1 = 0.2f;
     //線分１のオリジナルポジション
-    VECTOR osp1(0, 0.4f, 0);//original start point
-    VECTOR oep1(0, -0.4f, 0);//original end point
+    VECTOR osp1(0, 0.2f, 0);//original start point
+    VECTOR oep1(0, -osp1.y, 0);//original end point
     //線分１座標変換用データ
     VECTOR seg1Tran(0.0f, 0.0f, 0.0f);//セグメントの移動用 segment translate
     VECTOR seg1Rot;//セグメントの回転用 segment rotate
@@ -267,10 +348,10 @@ void gmain() {
     SEGMENT s1;
     //-----------------------------------------------------------------------
     //カプセル2半径
-    float radius2 = 0.1f;
+    float radius2 = 0.2f;
     //線分2のオリジナルポジション
-    VECTOR osp2(0, 0.4f, 0);//original start point
-    VECTOR oep2(0, -0.4f, 0);//original end point
+    VECTOR osp2(0, 0.2f, 0);//original start point
+    VECTOR oep2(0, -osp2.y, 0);//original end point
     //線分１座標変換用データ
     VECTOR seg2Tran(0.5f, 0.0f, 0.0f);//セグメントの移動用 segment translate
     VECTOR seg2Rot;//セグメントの回転用 segment rotate
@@ -278,7 +359,6 @@ void gmain() {
     SEGMENT s2;
     //-----------------------------------------------------------
     //移動回転スピード
-    MATRIX world;
     float speed = 0.3f;
     //表示フラッグ
     bool dispAxisFlag = false;
@@ -288,8 +368,8 @@ void gmain() {
     //色
     COLOR white(255, 255, 255);
     COLOR yellow(255, 255, 0);
-    COLOR colColor(255, 0, 0, 110);
-    COLOR noColColor(255, 255, 255, 100);
+    COLOR colColor(255, 0, 0, 130);
+    COLOR noColColor(255, 255, 255, 130);
     COLOR capsuleColor = noColColor;
     //プロジェクション行列を作っておく
     createProj();
@@ -343,7 +423,7 @@ void gmain() {
             //segment(mp2, mp1, yellow, 10);
             //sphere(mp1, yellow, 0.015f);
             //sphere(mp2, yellow, 0.015f);
-            dist = calcSegmentSegmentDist(s1, s2, mp1, mp2, t1, t2);
+            dist = calcSegmentSegmentDist_(s1, s2, mp1, mp2, t1, t2);
             print(dist);
             if (dist < radius1+radius2) capsuleColor = colColor;
             else capsuleColor = noColColor;
