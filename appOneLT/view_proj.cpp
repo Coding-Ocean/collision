@@ -6,8 +6,8 @@
 //行列
 extern MATRIX gWorld = { 0 }, gView = { 0 }, gProj = { 0 };
 //カメラの位置決め用変数
-float oAngleY = 20 * TO_RAD;
-float oAngleX = 20 * TO_RAD;
+float oAngleY = 0 * TO_RAD;
+float oAngleX = 0 * TO_RAD;
 float oRadius = 2;
 float angleY = oAngleY;
 float angleX = oAngleX;
@@ -95,6 +95,7 @@ void updateView()
     camPos.z = Cos(angleY) * Cos(angleX) * radius;
     gView.camera(camPos, lookat, up);
 
+    fill(255);
     textSize(30);
     textMode(BOTTOM);
     text(info, width - 180, height);
