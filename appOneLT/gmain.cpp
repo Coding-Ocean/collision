@@ -168,40 +168,40 @@ float calcSegmentSegmentDist
 {
     float dist = 0;
 
-    
-    // s1.v‚ªk‘Ş‚µ‚Ä‚¢‚éH
-    if (s1.v.magSq() < 0.000001f) {
-        // s2.v‚àk‘ŞH
-        if (s2.v.magSq() < 0.000001f) {
-            // “_‚Æ“_‚Ì‹——£‚Ì–â‘è‚É‹A’…
-            dist = (s2.sp - s1.sp).mag();
-            mp1 = s1.sp;
+    {
+        // s1.v‚ªk‘Ş‚µ‚Ä‚¢‚éH
+        if (s1.v.magSq() < 0.000001f) {
+            // s2.v‚àk‘ŞH
+            if (s2.v.magSq() < 0.000001f) {
+                // “_‚Æ“_‚Ì‹——£‚Ì–â‘è‚É‹A’…
+                dist = (s2.sp - s1.sp).mag();
+                mp1 = s1.sp;
+                mp2 = s2.sp;
+                t1 = t2 = 0.0f;
+                segment(mp1, mp2, COLOR(255, 255, 255), 10);
+                return dist;
+            }
+            else {
+                // s1.sp‚Æs2.v‚ÌÅ’Z–â‘è‚É‹A’…
+                dist = calcPointSegmentDist(s1.sp, s2, mp2, t2);
+                mp1 = s1.sp;
+                t1 = 0.0f;
+                clamp0to1(t2);
+                segment(mp1, mp2, COLOR(255, 255, 255), 10);
+                return dist;
+            }
+        }
+        // s2.v‚ªk‘Ş‚µ‚Ä‚¢‚éH
+        else if (s2.v.magSq() < 0.000001f) {
+            // s2.sp‚Æsv1‚ÌÅ’Z–â‘è‚É‹A’…
+            float dist = calcPointSegmentDist(s2.sp, s1, mp1, t1);
             mp2 = s2.sp;
-            t1 = t2 = 0.0f;
-            segment(mp1, mp2, COLOR(255, 255, 255), 10);
-            return dist;
-        }
-        else {
-            // s1.sp‚Æs2.v‚ÌÅ’Z–â‘è‚É‹A’…
-            dist = calcPointSegmentDist(s1.sp, s2, mp2, t2);
-            mp1 = s1.sp;
-            t1 = 0.0f;
-            clamp0to1(t2);
+            clamp0to1(t1);
+            t2 = 0.0f;
             segment(mp1, mp2, COLOR(255, 255, 255), 10);
             return dist;
         }
     }
-    // s2.v‚ªk‘Ş‚µ‚Ä‚¢‚éH
-    else if (s2.v.magSq() < 0.000001f) {
-        // s2.sp‚Æsv1‚ÌÅ’Z–â‘è‚É‹A’…
-        float dist = calcPointSegmentDist(s2.sp, s1, mp1, t1);
-        mp2 = s2.sp;
-        clamp0to1(t1);
-        t2 = 0.0f;
-        segment(mp1, mp2, COLOR(255, 255, 255), 10);
-        return dist;
-    }
-    
 
     //----------------------------------------------------------------
     //‚Æ‚è‚ ‚¦‚¸2’¼üŠÔ‚ÌÅ’Z‹——£,mp1,mp2,t1,t2‚ğ‹‚ß‚Ä‚İ‚é
@@ -412,9 +412,12 @@ void gmain() {
                 //point(s2.sp, yellow, 40);
                 //segment(s2.sp, mp1, yellow, 10);
                 //segment(s1.sp,s1.ep, white, 10);
-                //segment(s1.sp - s1.v * 5, s1.sp + s1.v * 5, white, 10);
+                //print((let)"t="+t1);
+                //segment(s1.sp - s1.v * 5, s1.ep + s1.v * 5, white, 10);
 
                 //dist = calcPointSegmentDist(s2.sp, s1, mp1, t1);
+                //print((let)"t="+t1);
+                //segment(s1.sp+s1.v*t1, s2.sp, yellow, 5);
                 //point(s2.sp, yellow, 40);
                 //segment(s2.sp, mp1, yellow, 10);
                 //segment(s1.sp,s1.ep, white, 10);
