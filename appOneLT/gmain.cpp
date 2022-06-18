@@ -5,7 +5,6 @@
 #include"segment.h"
 #include"point.h"
 #include"capsule.h"
-#include"sphere.h"
 //線分クラス(メンバデータはpublic)
 class SEGMENT {
 public:
@@ -100,7 +99,44 @@ float calcLineLineDist
     }
 
     //2直線が平行でない
-    //t1を求める式の詳細は下のコメントにある
+    //互いに垂直になるような最短線の端点mp1,mp2を求める
+    //次の順で求めていく t1 -> mp1 -> t2 -> mp2
+    //最初のt1を求める式の詳細は下のコメントにある
+    /*
+    両直線の最短距離を結ぶ線は、両直線に共通の垂線となる。。。その垂線の端点mp1,mp2
+    mp1 = s1.sp + s1.v * t1
+    mp2 = s2.sp + s2.v * t2
+
+    t2を求める式
+    t2 = dot(s2.v,mp1 - s2.sp) / dot(s2.v,s2.v)
+    最終的にt1を求めたいので、t2をt1で表現するためmp1を置き換える
+    t2 = dot(s2.v, s1.sp + s1.v * t1 - s2.sp) / dot(s2.v, s2.v)
+    分配してt1を計算しやすくしておく
+    t2 = dot(s2.v, s1.sp - s2.sp + s1.v * t1) / dot(s2.v, s2.v)
+    t2 = { dot(s2.v, s1.sp - s2.sp) + dot(s2.v, s1.v) * t1 } / dot(s2.v, s2.v)
+
+
+    次の式からt1を導く。バカ丁寧に変形していきます。
+    0 = dot(s1.v,mp1-mp2)
+    =dot(s1.v,(s1.sp+s1.v*t1)-(s2.sp+s2.v*t2))
+    =dot(s1.v, s1.sp-s2.sp + s1.v*t1 - s2.v*t2)
+    分配してt2を外に出す
+    =dot(s1.v, s1.sp-s2.sp) + dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v)*t2 )
+    t2を消す
+    =dot(s1.v, s1.sp-s2.sp) + dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v)*{ dot(s2.v, s1.sp - s2.sp) + dot(s2.v, s1.v) * t1 } / dot(s2.v, s2.v)
+    一番右の分母を消す（dot(s2.v, s2.v)を掛ける）
+    =dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp) + dot(s2.v,s2.v)*dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v) * {dot(s2.v, s1.sp - s2.sp) + dot(s2.v, s1.v) * t1}
+    中かっこを消す
+    =dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp) + dot(s2.v,s2.v)*dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v) * dot(s2.v, s1.sp - s2.sp) - dot(s1.v,s2.v) * dot(s2.v,s1.v) * t1
+    t1でくくる
+    =dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp)  - dot(s1.v,s2.v) * dot(s2.v, s1.sp - s2.sp) + { dot(s2.v,s2.v)*dot(s1.v,s1.v) - dot(s1.v,s2.v) * dot(s2.v,s1.v) }* t1
+    移項
+    -{dot(s2.v,s2.v)*dot(s1.v,s1.v) - dot(s1.v,s2.v) * dot(s2.v,s1.v)}*t1 = dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp)  - dot(s1.v,s2.v) * dot(s2.v, s1.sp - s2.sp)
+    t1=にして、整理していく
+    t1 = dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp)  - dot(s1.v,s2.v) * dot(s2.v, s1.sp - s2.sp) / - {dot(s2.v,s2.v)*dot(s1.v,s1.v) - dot(s1.v,s2.v) * dot(s2.v,s1.v)}
+    t1 = -dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp)  + dot(s1.v,s2.v) * dot(s2.v, s1.sp - s2.sp) / dot(s2.v,s2.v)*dot(s1.v,s1.v) - dot(s1.v,s2.v) * dot(s2.v,s1.v)
+    t1 = dot(s1.v,s2.v) * dot(s2.v, s1.sp - s2.sp) -　dot(s2.v,s2.v) * dot(s1.v, s1.sp-s2.sp)  / dot(s1.v,s1.v) * dot(s2.v,s2.v) - dot(s1.v,s2.v) * dot(s1.v,s2.v)
+    */
     float dv1v2 = dot(s1.v, s2.v);
     float dv1v1 = s1.v.magSq();//dot(s1.v,s1.v)と同じ
     float dv2v2 = s2.v.magSq();//dot(s2.v,s2.v)と同じ
@@ -111,42 +147,6 @@ float calcLineLineDist
     t2 = dot(s2.v, mp1 - s2.sp) / dv2v2;
     mp2 = s2.sp + s2.v * t2;
     return (mp2 - mp1).mag();
-
-    /*
-    両直線の最短距離を結ぶ線は、両直線に共通の垂線となる。。。その垂線の端点mp1,mp2
-    mp1 = s1.sp + s1.v * t1
-    mp2 = s2.sp + s2.v * t2
-
-    t2を求める式
-    t2 = dot(s2.v,mp1 - s2.sp) / dot(s2.v,s2.v)
-    mp1を置き換えると、t2はt1で表現できる
-    t2 = dot(s2.v, sp1.sp + s1.v * t1 - s2.sp) / dot(s2.v, s2.v)
-
-    次の式からt1を導く。バカ丁寧に変形していきます。
-    0 = dot(s1.v,mp1-mp2)
-    =dot(s1.v,(s1.sp+s1.v*t1)-(s2.sp+s2.v*t2))
-    =dot(s1.v, s1.sp-s2.sp + s1.v*t1 - s2.v*t2)
-    分配
-    =dot(s1.v, s1.sp-s2.sp) + dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v)*t2)
-    t2を消す
-    =dot(s1.v, s1.sp-s2.sp) + dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v) * dot(s2.v, sp1.sp + s1.v * t1 - s2.sp) / dot(s2.v,s2.v)
-    　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　             ↓入れ替え
-    =dot(s1.v, s1.sp-s2.sp) + dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp + s1.v * t1) / dot(s2.v,s2.v)
-    一番右の分母を消す
-    =dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp) + dot(s2.v,s2.v)*dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp + s1.v * t1)
-    一番右を分配してtを出す
-    =dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp) + dot(s2.v,s2.v)*dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v) * [dot(s2.v, sp1.sp - s2.sp) + dot(s2.v,s1.v) * t1]
-    大かっこを消す
-    =dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp) + dot(s2.v,s2.v)*dot(s1.v,s1.v)*t1 - dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp) - dot(s1.v,s2.v) * dot(s2.v,s1.v) * t1
-    t1でくくる
-    =dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp)  - dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp) + [dot(s2.v,s2.v)*dot(s1.v,s1.v) - dot(s1.v,s2.v) * dot(s2.v,s1.v) ]* t1
-    移項
-    -[dot(s2.v,s2.v)*dot(s1.v,s1.v) - dot(s1.v,s2.v) * dot(s2.v,s1.v) ]*t1=dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp)  - dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp)
-    t1=にして整理していく
-    t1=dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp)  - dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp) / - [dot(s2.v,s2.v)*dot(s1.v,s1.v) - dot(s1.v,s2.v) * dot(s2.v,s1.v) ]
-    t1=-dot(s2.v,s2.v)*dot(s1.v, s1.sp-s2.sp)  + dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp) / dot(s2.v,s2.v)*dot(s1.v,s1.v) - dot(s1.v,s2.v) * dot(s2.v,s1.v)
-    t1=dot(s1.v,s2.v) * dot(s2.v, sp1.sp - s2.sp) -　dot(s2.v,s2.v) * dot(s1.v, s1.sp-s2.sp)  / dot(s1.v,s1.v) * dot(s2.v,s2.v) - dot(s1.v,s2.v) * dot(s1.v,s2.v)
-    */
 }
 
 //0～1の間にクランプ(値を強制的にある範囲内にすること)
@@ -168,40 +168,40 @@ float calcSegmentSegmentDist
 {
     float dist = 0;
 
-    /*
-    // sv1が縮退している？
-    if (sv1.magSq() < 0.000001f) {
-        // sv2も縮退？
-        if (sv2.magSq() < 0.000001f) {
+    
+    // s1.vが縮退している？
+    if (s1.v.magSq() < 0.000001f) {
+        // s2.vも縮退？
+        if (s2.v.magSq() < 0.000001f) {
             // 点と点の距離の問題に帰着
-            dist = (sp2 - sp1).mag();
-            mp1 = sp1;
-            mp2 = sp2;
+            dist = (s2.sp - s1.sp).mag();
+            mp1 = s1.sp;
+            mp2 = s2.sp;
             t1 = t2 = 0.0f;
             segment(mp1, mp2, COLOR(255, 255, 255), 10);
             return dist;
         }
         else {
-            // sp1とsv2の最短問題に帰着
-            dist = calcPointSegmentDist(sp1, sp2, ep2, mp2, t2);
-            mp1 = sp1;
+            // s1.spとs2.vの最短問題に帰着
+            dist = calcPointSegmentDist(s1.sp, s2, mp2, t2);
+            mp1 = s1.sp;
             t1 = 0.0f;
-            clamp01(t2);
+            clamp0to1(t2);
             segment(mp1, mp2, COLOR(255, 255, 255), 10);
             return dist;
         }
     }
-    // sv2が縮退している？
-    else if (sv2.magSq() < 0.000001f) {
-        // sp2とsv1の最短問題に帰着
-        float dist = calcPointSegmentDist(sp2, sp1, ep1, mp1, t1);
-        mp2 = sp2;
-        clamp01(t1);
+    // s2.vが縮退している？
+    else if (s2.v.magSq() < 0.000001f) {
+        // s2.spとsv1の最短問題に帰着
+        float dist = calcPointSegmentDist(s2.sp, s1, mp1, t1);
+        mp2 = s2.sp;
+        clamp0to1(t1);
         t2 = 0.0f;
         segment(mp1, mp2, COLOR(255, 255, 255), 10);
         return dist;
     }
-    */
+    
 
     //----------------------------------------------------------------
     //とりあえず2直線間の最短距離,mp1,mp2,t1,t2を求めてみる
@@ -257,41 +257,6 @@ float calcSegmentSegmentDist_
 )
 {
     float dist = 0;
-
-    /*
-    // sv1が縮退している？
-    if (sv1.magSq() < 0.000001f) {
-        // sv2も縮退？
-        if (sv2.magSq() < 0.000001f) {
-            // 点と点の距離の問題に帰着
-            dist = (sp2 - sp1).mag();
-            mp1 = sp1;
-            mp2 = sp2;
-            t1 = t2 = 0.0f;
-            segment(mp1, mp2, COLOR(255, 255, 255), 10);
-            return dist;
-        }
-        else {
-            // sp1とsv2の最短問題に帰着
-            dist = calcPointSegmentDist(sp1, sp2, ep2, mp2, t2);
-            mp1 = sp1;
-            t1 = 0.0f;
-            clamp01(t2);
-            segment(mp1, mp2, COLOR(255, 255, 255), 10);
-            return dist;
-        }
-    }
-    // sv2が縮退している？
-    else if (sv2.magSq() < 0.000001f) {
-        // sp2とsv1の最短問題に帰着
-        float dist = calcPointSegmentDist(sp2, sp1, ep1, mp1, t1);
-        mp2 = sp2;
-        clamp01(t1);
-        t2 = 0.0f;
-        segment(mp1, mp2, COLOR(255, 255, 255), 10);
-        return dist;
-    }
-    */
 
     //------------------------------------------------------------------------
     //check1:とりあえず2直線間の最短距離,mp1,mp2,t1,t2を求めてみる
@@ -363,7 +328,6 @@ void gmain() {
     createSegment();
     createPoint();
     createCapsule();
-    createSphere();
     //-----------------------------------------------------------------------
     //カプセル1半径
     float radius1 = 0.2f;
@@ -395,6 +359,7 @@ void gmain() {
     int operateObjSw = 0;
     //その他------------------------------------------------------------------
     //色
+    COLOR yellow(255, 255, 0);
     COLOR white(255, 255, 255);
     COLOR colColor(255, 0, 0, 130);
     COLOR noColColor(255, 255, 255, 130);
@@ -441,16 +406,26 @@ void gmain() {
             float t1;
             float t2;
             float dist = 0;
-            //dist = calcPointLineDist(s2.sp, s1,  mp1, t1);
-            //sphere(s2.sp, white, 0.02f);
-            //segment(s2.sp, mp1, yellow, 10);
-            //dist = calcPointSegmentDist(s2.sp, s1, mp1, t1);
-            //sphere(s2.sp, white, 0.02f);
-            //segment(s2.sp, mp1, yellow, 10);
-            //dist = calcLineLineDist(s1, s2, mp1, mp2, t1, t2);
-            //segment(mp2, mp1, yellow, 10);
-            //sphere(mp1, yellow, 0.015f);
-            //sphere(mp2, yellow, 0.015f);
+            {
+                //ステップごとの解説用
+                //dist = calcPointLineDist(s2.sp, s1, mp1, t1);
+                //point(s2.sp, yellow, 40);
+                //segment(s2.sp, mp1, yellow, 10);
+                //segment(s1.sp,s1.ep, white, 10);
+                //segment(s1.sp - s1.v * 5, s1.sp + s1.v * 5, white, 10);
+
+                //dist = calcPointSegmentDist(s2.sp, s1, mp1, t1);
+                //point(s2.sp, yellow, 40);
+                //segment(s2.sp, mp1, yellow, 10);
+                //segment(s1.sp,s1.ep, white, 10);
+
+                //dist = calcLineLineDist(s1, s2, mp1, mp2, t1, t2);
+                //segment(mp2, mp1, yellow, 10);
+                //point(mp1, yellow, 40);
+                //point(mp2, yellow, 40);
+                //segment(s1.sp - s1.v * 5, s1.sp + s1.v * 5, white, 10);
+                //segment(s2.sp - s2.v * 5, s2.sp + s2.v * 5, white, 10);
+            }
             dist = calcSegmentSegmentDist_(s1, s2, mp1, mp2, t1, t2);
             print((let)"distance="+dist);
             if (dist < radius1+radius2) capsuleColor = colColor;
@@ -460,12 +435,10 @@ void gmain() {
         {
             //軸
             if(dispAxisFlag)axis(white, 1);
-#ifdef _DEBUG
             //線分１
             s1.draw();
             //線分２
             s2.draw();
-#endif
             //カプセル
             capsule(seg2Tran, seg2Rot, capsuleColor, osp2.y, radius2);
             capsule(seg1Tran, seg1Rot, capsuleColor, osp1.y, radius1);
