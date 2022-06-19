@@ -19,7 +19,6 @@ void createCapsule()
     op[k].set(0, 1, 0);
     bright[k] = dot(light, op[k]);
     if (bright[k] < ambient)bright[k] = ambient;
-//    op[k].y = radius + ofst;
     k++;
     //上半球
     for (j = 0; j < (numAng / 4); j++) {
@@ -31,8 +30,6 @@ void createCapsule()
             //op[k]を法線として頂点の明るさを計算
             bright[k] = dot(light, op[k]);
             if (bright[k] < ambient)bright[k] = ambient;
-//            op[k] *= radius;
-//            op[k].y += ofst;
             k++;
         }
     }
@@ -46,8 +43,6 @@ void createCapsule()
             //op[k]を法線として頂点の明るさを計算
             bright[k] = dot(light, op[k]);
             if (bright[k] < ambient)bright[k] = ambient;
-//            op[k] *= radius;
-//            op[k].y -= ofst;
             k++;
         }
     }
@@ -55,17 +50,16 @@ void createCapsule()
     op[k].set(0, -1, 0);
     bright[k] = dot(light, op[k]);
     if (bright[k] < ambient)bright[k] = ambient;
-//    op[k].y = -radius - ofst;
 }
 void capsule(const VECTOR& t, const VECTOR& r, 
-    const COLOR& col, float halfH, float radius)
+    const COLOR& col, float segStartPos, float segEndPos,float radius)
 {
     VECTOR p[numVtx];
     //上半球
     gWorld.identity();
     gWorld.mulTranslate(t);
     gWorld.mulRotateYXZ(r);
-    gWorld.mulTranslate(0,halfH,0);
+    gWorld.mulTranslate(0,segStartPos,0);
     gWorld.mulScaling(radius,radius,radius);
     for (int i = 0; i < numVtx/2; i++) {
         p[i] = gWorld * op[i];
@@ -76,7 +70,7 @@ void capsule(const VECTOR& t, const VECTOR& r,
     gWorld.identity();
     gWorld.mulTranslate(t);
     gWorld.mulRotateYXZ(r);
-    gWorld.mulTranslate(0,-halfH,0);
+    gWorld.mulTranslate(0,segEndPos,0);
     gWorld.mulScaling(radius,radius,radius);
     for (int i = numVtx/2; i < numVtx; i++) {
         p[i] = gWorld * op[i];

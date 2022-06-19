@@ -92,9 +92,9 @@ float calcLineLineDist
     //2直線が平行
     if (cross(s1.v, s2.v).magSq() < 0.000001f) {
         //線分1の始点から直線2までの最短距離問題に帰着する
-        float dist = calcPointLineDist(s1.sp, s2, mp2, t2);
-        mp1 = s1.sp;
         t1 = 0.0f;
+        mp1 = s1.sp;
+        float dist = calcPointLineDist(mp1, s2, mp2, t2);
         return dist;
     }
 
@@ -213,12 +213,11 @@ float calcSegmentSegmentDist
     }
     //mp1,mp2の両方、またはどちらかが線分内になかったので次へ
 
-
     //----------------------------------------------------------------
     //mp1,t1を求め直す ⇒ t2を0～1にクランプしてmp2からs1.vに垂線を降ろしてみる
     clamp0to1(t2);
     mp2 = s2.sp + s2.v * t2;
-    dist = calcPointSegmentDist(mp2, s1, mp1, t1);
+    dist = calcPointLineDist(mp2, s1, mp1, t1);
     if (0.0f <= t1 && t1 <= 1.0f) {
         //mp1が線分内にあった
         return dist;
@@ -229,7 +228,7 @@ float calcSegmentSegmentDist
     //mp2,t2を求め直す ⇒ t1を0～1にクランプしてmp1からs2.vに垂線を降ろしてみる
     clamp0to1(t1);
     mp1 = s1.sp + s1.v * t1;
-    dist = calcPointSegmentDist(mp1, s2, mp2, t2);
+    dist = calcPointLineDist(mp1, s2, mp2, t2);
     if (0.0f <= t2 && t2 <= 1.0f) {
         //mp2が線分内にあった
         return dist;
@@ -237,7 +236,9 @@ float calcSegmentSegmentDist
     //mp2が線分内になかったので次へ
 
     //----------------------------------------------------------------
-    //ここまで来たら、mp1からmp2までが最短
+    //t2をクランプしてmp2を再計算すると、mp1からmp2までが最短
+    clamp0to1(t2);
+    mp2 = s2.sp + s2.v * t2;
     return (mp2 - mp1).mag();
 }
 
@@ -256,6 +257,10 @@ float calcSegmentSegmentDist_
     float& t2  //s2.vの長さを1とした時の「s2.spからmp2までの長さ」の割合
 )
 {
+    //直線に見せるための補助線
+    segment(s1.sp - s1.v * 3, s1.ep + s1.v * 3, COLOR(90, 90, 90), 2);
+    segment(s2.sp - s2.v * 3, s2.ep + s2.v * 3, COLOR(90, 90, 90), 2);
+
     float dist = 0;
 
     //------------------------------------------------------------------------
@@ -266,40 +271,40 @@ float calcSegmentSegmentDist_
         0.0f <= t2 && t2 <= 1.0f) {
         //mp1,mp2が両方とも線分内にあった
         print((let)"check1〇：t1="+t1+" t2="+t2);
+        segment(mp1, mp2, Yellow, 10);
         point(mp1, Yellow, 30);
         point(mp2, Yellow, 30);
-        segment(mp1, mp2, Yellow, 10);
         return dist;
     }
     print((let)"check1×：t1="+t1+" t2="+t2);
     segment(mp1, mp2, Yellow, 2);
-    point(mp1, Yellow, 12);
     point(mp2, Yellow, 12);
+    point(mp1, Yellow, 12);
     //mp1,mp2の両方、またはどちらかが線分内になかったので次へ
 
     //------------------------------------------------------------------------
     //check2:mp1,t1を求め直す ⇒ t2を0～1にクランプしてmp2からs1.vに垂線を降ろしてみる
     clamp0to1(t2);
     mp2 = s2.sp + s2.v * t2;
-    dist = calcPointSegmentDist(mp2, s1, mp1, t1);
+    dist = calcPointLineDist(mp2, s1, mp1, t1);
     fill(Red);
     if (0.0f <= t1 && t1 <= 1.0f) {
         //mp1が線分内にあった
         print((let)"check2〇：t1=" + t1 + " t2=" + t2);
-        point(mp1, Red, 30);
         segment(mp1, mp2, Red, 10);
+        point(mp1, Red, 30);
         return dist;
     }
     print((let)"check2×：t1=" + t1 + " t2=" + t2);
-    segment(s1.sp+s1.v*t1, mp2, Red, 2);
-    point(s1.sp + s1.v * t1, Red, 12);
+    segment(mp1, mp2, Red, 2);
+    point(mp1, Red, 12);
     //mp1が線分内になかったので次へ
 
     //------------------------------------------------------------------------
     //check3:mp2,t2を求め直す ⇒ t1を0～1にクランプしてmp1からs2.vに垂線を降ろしてみる
     clamp0to1(t1);
     mp1 = s1.sp + s1.v * t1;
-    dist = calcPointSegmentDist(mp1, s2, mp2, t2);
+    dist = calcPointLineDist(mp1, s2, mp2, t2);
     fill(Green);
     if (0.0f <= t2 && t2 <= 1.0f) {
         //mp2が線分内にあった
@@ -309,16 +314,17 @@ float calcSegmentSegmentDist_
         return dist;
     }
     print((let)"check3×：t1=" + t1 + " t2=" + t2);
-    segment(mp1, s2.sp + s2.v * t2, Green, 2);
-    point(s2.sp + s2.v * t2, Green, 12);
+    segment(mp1, mp2, Green, 2);
+    point(mp2, Green, 12);
     //mp2が線分内になかったので次へ
 
     //-----------------------------------------------------------------------
-    //ここまで来たら、mp1からmp2までが最短
-    fill(Cyan);
     clamp0to1(t2);
+    mp2 = s2.sp + s2.v * t2;
+    fill(Cyan);
     print((let)"last  　：t1=" + t1 + " t2=" + t2);
     segment(mp1, mp2, COLOR(Cyan), 10);
+    //ここまで来たら、mp1からmp2までが最短
     return (mp2 - mp1).mag();
 }
 
@@ -346,7 +352,7 @@ void gmain() {
     VECTOR osp2(0, 0.2f, 0);//original start point
     VECTOR oep2(0, -osp2.y, 0);//original end point
     //線分１座標変換用データ
-    VECTOR seg2Tran(0.5f, 0.0f, 0.0f);//セグメントの移動用 segment translate
+    VECTOR seg2Tran(0.5f, -0.15f, 0.0f);//セグメントの移動用 segment translate
     VECTOR seg2Rot;//セグメントの回転用 segment rotate
     //線分１(座用変換後の値をこれにセットする)
     SEGMENT s2;
@@ -370,6 +376,8 @@ void gmain() {
     initDeltaTime();
     //メインループ-------------------------------------------------------------
     while (notQuit) {
+        printPosX(20);
+        printPosY(20);
         //デルタタイム設定
         setDeltaTime();
         //更新中のデータを表示するため、ここでクリア
@@ -407,13 +415,13 @@ void gmain() {
             float t2;
             float dist = 0;
             {
-                //ステップごとの解説用
+                //関数別解説用--------------------------------------
                 //dist = calcPointLineDist(s2.sp, s1, mp1, t1);
                 //point(s2.sp, yellow, 40);
                 //segment(s2.sp, mp1, yellow, 10);
                 //segment(s1.sp,s1.ep, white, 10);
                 //print((let)"t="+t1);
-                //segment(s1.sp - s1.v * 5, s1.ep + s1.v * 5, white, 10);
+                //segment(s1.sp - s1.v * 3, s1.ep + s1.v * 3, white, 10);
 
                 //dist = calcPointSegmentDist(s2.sp, s1, mp1, t1);
                 //print((let)"t="+t1);
@@ -426,8 +434,8 @@ void gmain() {
                 //segment(mp2, mp1, yellow, 10);
                 //point(mp1, yellow, 40);
                 //point(mp2, yellow, 40);
-                //segment(s1.sp - s1.v * 5, s1.sp + s1.v * 5, white, 10);
-                //segment(s2.sp - s2.v * 5, s2.sp + s2.v * 5, white, 10);
+                //segment(s1.sp - s1.v * 3, s1.ep + s1.v * 3, white, 10);
+                //segment(s2.sp - s2.v * 3, s2.ep + s2.v * 3, white, 10);
             }
             dist = calcSegmentSegmentDist_(s1, s2, mp1, mp2, t1, t2);
             print((let)"distance="+dist);
@@ -443,8 +451,8 @@ void gmain() {
             //線分２
             s2.draw();
             //カプセル
-            capsule(seg2Tran, seg2Rot, capsuleColor, osp2.y, radius2);
-            capsule(seg1Tran, seg1Rot, capsuleColor, osp1.y, radius1);
+            capsule(seg2Tran, seg2Rot, capsuleColor, osp2.y, oep2.y, radius2);
+            capsule(seg1Tran, seg1Rot, capsuleColor, osp1.y, oep1.y, radius1);
 
             //テキスト情報
             //float size = 30;
